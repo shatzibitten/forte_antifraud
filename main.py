@@ -35,6 +35,9 @@ def main():
     # Train Stacking Meta-Model
     architect.train_stacking()
     
+    # Save models for future inference
+    architect.save_models()
+    
     # 4. Auditor
     # We need to wrap the stacking prediction in a way Auditor accepts (it expects a model with predict_proba)
     class StackingWrapper:

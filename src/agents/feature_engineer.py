@@ -60,6 +60,23 @@ class FeatureEngineerAgent:
         # avg_login_interval_30d is in seconds (presumably)
         self.df['amount_per_login_interval'] = self.df['amount'] / (self.df['avg_login_interval_30d'] + 1e-5)
 
+        # --- NEW INTERACTIONS (v2) ---
+        
+        # 1. Night Time Flag (00:00 - 06:00)
+        # Extract hour from transdatetime
+        self.df['hour'] = self.df['transdatetime'].dt.hour
+        self.df['is_night'] = ((self.df['hour'] >= 0) & (self.df['hour'] < 6)).astype(int)
+        
+        # 2. Night * Amount (High amount at night is suspicious)
+        self.df['interaction_night_amount'] = self.df['is_night'] * self.df['amount']
+        
+        # 3. Device Changes * Frequency (New device + high velocity = suspicious)
+        # monthly_os_changes * count_txn_1h
+        self.df['interaction_device_freq'] = self.df['monthly_os_changes'] * self.df['count_txn_1h']
+        
+        # 4. Amount relative to history * Night (Spike in amount during night)
+        self.df['interaction_night_rel_amount'] = self.df['is_night'] * self.df['amount_to_avg_30d']
+
     def generate_identity_features(self):
         """Generates identity consistency features."""
         logger.info("Generating identity features...")

@@ -225,6 +225,67 @@ class ModelArchitectAgent:
         meta_features = pd.DataFrame({'catboost': cb_pred, 'lgbm': lg_pred})
         return self.meta_model.predict_proba(meta_features)[:, 1]
 
+    def save_models(self, path='models/'):
+        """Saves all trained models to disk."""
+        import os
+        import joblib
+        
+        if not os.path.exists(path):
+            os.makedirs(path)
+            
+        logger.info(f"Saving models to {path}...")
+        
+        if self.catboost_model:
+            self.catboost_model.save_model(os.path.join(path, 'catboost_model.cbm'))
+            
+        if self.lgbm_model:
+            self.lgbm_model.booster_.save_model(os.path.join(path, 'lightgbm_model.txt'))
+            
+        if hasattr(self, 'meta_model'):
+            joblib.dump(self.meta_model, os.path.join(path, 'meta_model.joblib'))
+            
+        logger.info("Models saved successfully.")
+
+    def load_models(self, path='models/'):
+        """Loads models from disk."""
+        import os
+        import joblib
+        
+        logger.info(f"Loading models from {path}...")
+        
+        if os.path.exists(os.path.join(path, 'catboost_model.cbm')):
+            self.catboost_model = CatBoostClassifier()
+            self.catboost_model.load_model(os.path.join(path, 'catboost_model.cbm'))
+            
+        if os.path.exists(os.path.join(path, 'lightgbm_model.txt')):
+            self.lgbm_model = lgb.Booster(model_file=os.path.join(path, 'lightgbm_model.txt'))
+            # Wrap in sklearn-like interface for consistency if needed, 
+            # but for inference we might just use predict directly.
+            # Re-creating LGBMClassifier wrapper is tricky with loaded booster.
+            # We'll handle this in predict_stacking_inference.
+            
+        if os.path.exists(os.path.join(path, 'meta_model.joblib')):
+            self.meta_model = joblib.load(os.path.join(path, 'meta_model.joblib'))
+            
+        logger.info("Models loaded.")
+
+    def predict_stacking_inference(self, X):
+        """Predicts using loaded models (handles LGBM booster difference)."""
+        # Ensure X has same format
+        X_lgb = X.copy()
+        for col in self.cat_features:
+            if col in X_lgb.columns:
+                X_lgb[col] = X_lgb[col].astype('category')
+                
+        cb_pred = self.catboost_model.predict_proba(X)[:, 1]
+        
+        # LGBM Booster predicts raw scores or probs depending on objective. 
+        # For binary classification with 'auc' it usually outputs probabilities directly.
+        lg_pred = self.lgbm_model.predict(X_lgb)
+        
+        meta_features = pd.DataFrame({'catboost': cb_pred, 'lgbm': lg_pred})
+        return self.meta_model.predict_proba(meta_features)[:, 1]
+
 if __name__ == "__main__":
     # Test run
     from data_steward import DataStewardAgent
