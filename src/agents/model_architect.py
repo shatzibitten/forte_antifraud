@@ -450,6 +450,16 @@ class ModelArchitectAgent:
         self.meta_model.fit(meta_X, meta_y)
         
         logger.info(f"Stacking Meta-Model Coefficients: {self.meta_model.coef_}")
+        
+        # [NEW] Train Probability Calibration (Isotonic Regression)
+        # We use the meta-model's predictions on the OOF data as input for calibration
+        logger.info("Training Probability Calibrator (Isotonic Regression)...")
+        from sklearn.isotonic import IsotonicRegression
+        
+        meta_preds = self.meta_model.predict_proba(meta_X)[:, 1]
+        self.calibrator = IsotonicRegression(out_of_bounds='clip')
+        self.calibrator.fit(meta_preds, meta_y)
+        
         return self.meta_model
 
     def predict_stacking(self, X):
@@ -474,7 +484,12 @@ class ModelArchitectAgent:
             'lgbm': lg_pred,
             'xgboost': xg_pred
         })
-        return self.meta_model.predict_proba(meta_features)[:, 1]
+        raw_probs = self.meta_model.predict_proba(meta_features)[:, 1]
+        
+        # Apply calibration if available
+        if hasattr(self, 'calibrator'):
+            return self.calibrator.transform(raw_probs)
+        return raw_probs
 
     def save_models(self, path='models/'):
         """Saves all trained models to disk."""
@@ -497,6 +512,9 @@ class ModelArchitectAgent:
 
         if hasattr(self, 'meta_model'):
             joblib.dump(self.meta_model, os.path.join(path, 'meta_model.joblib'))
+            
+        if hasattr(self, 'calibrator'):
+            joblib.dump(self.calibrator, os.path.join(path, 'calibrator.joblib'))
             
         logger.info("Models saved successfully.")
 
@@ -521,6 +539,9 @@ class ModelArchitectAgent:
             
         if os.path.exists(os.path.join(path, 'meta_model.joblib')):
             self.meta_model = joblib.load(os.path.join(path, 'meta_model.joblib'))
+            
+        if os.path.exists(os.path.join(path, 'calibrator.joblib')):
+            self.calibrator = joblib.load(os.path.join(path, 'calibrator.joblib'))
             
         logger.info("Models loaded.")
 
@@ -557,7 +578,11 @@ class ModelArchitectAgent:
             'lgbm': lg_pred,
             'xgboost': xg_pred
         })
-        return self.meta_model.predict_proba(meta_features)[:, 1]
+        raw_probs = self.meta_model.predict_proba(meta_features)[:, 1]
+        
+        if hasattr(self, 'calibrator'):
+            return self.calibrator.transform(raw_probs)
+        return raw_probs
 
 if __name__ == "__main__":
     # Test run
