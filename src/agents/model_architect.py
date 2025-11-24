@@ -20,7 +20,9 @@ class ModelArchitectAgent:
             'high_risk_device', 'is_fake_os', 'direction_fan_in', 'direction_txn_count',
             'time_since_last_txn', 'monthly_os_changes', 'monthly_phone_model_changes',
             'burstiness_login_interval', 'fano_factor_login_interval', 'zscore_avg_login_interval_7d',
-            'logins_last_7_days', 'logins_last_30_days'
+            'logins_last_7_days', 'logins_last_30_days',
+            'mcc_risk_score', 'is_high_risk_mcc', 'days_since_os_release', 'is_future_os', 'is_obsolete_os',
+            'amount_decimal', 'last_os_categorical_freq', 'last_phone_model_categorical_freq'
         ]
         self.cat_features = ['last_os_categorical', 'last_phone_model_categorical']
         self.target = 'target'

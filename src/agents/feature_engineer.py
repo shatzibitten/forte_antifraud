@@ -16,13 +16,149 @@ class FeatureEngineerAgent:
         self.generate_velocity_features()
         self.generate_interaction_features()
         self.generate_identity_features()
+        self.generate_external_features()
+        self.generate_ieee_features()  # [NEW] IEEE-CIS Features
         self.generate_graph_features()
         self.generate_time_delta_features()
         self.generate_gnn_features()
         self.generate_anomaly_features()
         return self.df
 
+    def generate_ieee_features(self):
+        """Generates features inspired by IEEE-CIS Fraud Detection competition."""
+        logger.info("Generating IEEE-CIS features...")
+        
+        # 1. Decimal Part of Transaction Amount
+        # Fraudsters often use specific decimal amounts or auto-generated values
+        self.df['amount_decimal'] = self.df['amount'] % 1
+        
+        # 2. Frequency Encoding for Categorical Features
+        # Helps the model understand how rare a device/OS is
+        for col in ['last_os_categorical', 'last_phone_model_categorical']:
+            freq_col_name = f'{col}_freq'
+            # Compute frequency on the whole dataset
+            freq_map = self.df[col].value_counts(normalize=True).to_dict()
+            self.df[freq_col_name] = self.df[col].map(freq_map).fillna(0)
+
     def generate_velocity_features(self):
+        """Generates velocity features (rolling window stats)."""
+        logger.info("Generating velocity features...")
+        
+        # Ensure sorted by time
+        self.df = self.df.sort_values('transdatetime')
+        
+        # Group by client
+        grouped = self.df.groupby('cst_dim_id')
+        
+        # Rolling windows need index to be datetime for time-based rolling
+        # But we have multiple clients, so we iterate or use transform
+        # Using transform with rolling is tricky with time offsets if index is not unique
+        # Easier approach: set index to transdatetime, group by client, then rolling
+        
+        temp_df = self.df.set_index('transdatetime').sort_index()
+        grouped_time = temp_df.groupby('cst_dim_id')
+        
+        # 1 hour count
+        # We use '1h' string for time offset
+        self.df['count_txn_1h'] = grouped_time['amount'].rolling('1h').count().reset_index(level=0, drop=True).values
+        
+        # 24 hour sum
+        self.df['sum_amount_24h'] = grouped_time['amount'].rolling('24h').sum().reset_index(level=0, drop=True).values
+        
+        # 7 days std
+        self.df['std_amount_7d'] = grouped_time['amount'].rolling('7d').std().reset_index(level=0, drop=True).values
+        
+        # Ratio of current amount to 30-day average (simulated by 30d rolling mean)
+        self.df['avg_amount_30d'] = grouped_time['amount'].rolling('30d').mean().reset_index(level=0, drop=True).values
+        self.df['amount_to_avg_30d'] = self.df['amount'] / (self.df['avg_amount_30d'] + 1e-5)
+
+    def generate_external_features(self):
+        """Generates features from external datasets (MCC, OS)."""
+        logger.info("Generating external features (MCC, OS)...")
+        
+        # 1. High Risk MCC
+        try:
+            mcc_df = pd.read_csv('datasets/external/high_risk_mcc.csv')
+            # Create dictionary {mcc: risk_score}
+            mcc_risk = dict(zip(mcc_df['mcc_code'], mcc_df['risk_score']))
+            
+            # Map to transactions
+            # Ensure mcc_code is int if possible, or handle string
+            if 'mcc_code' in self.df.columns:
+                self.df['mcc_risk_score'] = self.df['mcc_code'].map(mcc_risk).fillna(0)
+                self.df['is_high_risk_mcc'] = (self.df['mcc_risk_score'] > 0).astype(int)
+            else:
+                self.df['mcc_risk_score'] = 0
+                self.df['is_high_risk_mcc'] = 0
+                
+        except Exception as e:
+            logger.warning(f"Failed to load MCC dataset: {e}")
+            self.df['mcc_risk_score'] = 0
+            self.df['is_high_risk_mcc'] = 0
+
+        # 2. OS Release Dates
+        try:
+            os_df = pd.read_csv('datasets/external/os_release_dates.csv')
+            os_df['release_date'] = pd.to_datetime(os_df['release_date'])
+            
+            # Create dictionary {os_version: release_date}
+            # We need to match partial strings e.g. "iOS 16.1" -> "iOS 16.0"
+            # For simplicity, we'll try to match the major version
+            
+            def get_os_age(row):
+                os_ver = str(row.get('last_os_categorical', ''))
+                txn_date = row['transdatetime']
+                
+                if pd.isna(txn_date) or os_ver == 'nan':
+                    return -1
+                
+                # Find matching OS in our DB
+                # Simple heuristic: check if any OS in DB is a substring of user OS
+                # Sort OS DB by length desc to match longest first (e.g. iOS 16 vs iOS 1)
+                
+                best_match_date = None
+                
+                # Optimization: Pre-filter OS list? No, just iterate.
+                # This might be slow for large DF. Better to map unique OS versions first.
+                return -1 # Placeholder, see optimized implementation below
+            
+            # Optimized approach:
+            # 1. Get unique OS versions from DF
+            unique_os = self.df['last_os_categorical'].astype(str).unique()
+            os_release_map = {}
+            
+            # Sort reference OS list by length desc
+            os_refs = os_df.sort_values('os_version', key=lambda x: x.str.len(), ascending=False)
+            
+            for user_os in unique_os:
+                match_date = pd.NaT
+                for _, ref_row in os_refs.iterrows():
+                    # Check if reference OS (e.g. "iOS 16") is in user OS (e.g. "iOS 16.1.2")
+                    if ref_row['os_version'] in user_os:
+                        match_date = ref_row['release_date']
+                        break
+                os_release_map[user_os] = match_date
+            
+            # Map release dates to dataframe
+            self.df['os_release_date'] = self.df['last_os_categorical'].astype(str).map(os_release_map)
+            
+            # Calculate days since release
+            # If os_release_date is NaT, it means unknown OS -> 0 days or -1
+            self.df['days_since_os_release'] = (self.df['transdatetime'] - self.df['os_release_date']).dt.days
+            self.df['days_since_os_release'] = self.df['days_since_os_release'].fillna(-1)
+            
+            # Feature: Is Future OS? (Negative days means txn happened BEFORE OS release -> Fake/TimeTravel)
+            # Allow small buffer for beta versions (e.g. -90 days)
+            self.df['is_future_os'] = (self.df['days_since_os_release'] < -30).astype(int)
+            
+            # Feature: Is Obsolete OS? (e.g. > 1500 days ~ 4 years)
+            self.df['is_obsolete_os'] = (self.df['days_since_os_release'] > 1500).astype(int)
+            
+        except Exception as e:
+            logger.warning(f"Failed to load OS dataset: {e}")
+            self.df['days_since_os_release'] = -1
+            self.df['is_future_os'] = 0
+            self.df['is_obsolete_os'] = 0
         """Generates velocity features (rolling window stats)."""
         logger.info("Generating velocity features...")
         
