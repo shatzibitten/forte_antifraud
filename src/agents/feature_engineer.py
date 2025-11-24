@@ -18,6 +18,8 @@ class FeatureEngineerAgent:
         self.generate_identity_features()
         self.generate_graph_features()
         self.generate_time_delta_features()
+        self.generate_gnn_features()
+        self.generate_anomaly_features()
         return self.df
 
     def generate_velocity_features(self):
@@ -119,10 +121,50 @@ class FeatureEngineerAgent:
         """Generates time delta features."""
         logger.info("Generating time delta features...")
         
-        # Time since last transaction for this client
-        self.df = self.df.sort_values(['cst_dim_id', 'transdatetime'])
         self.df['time_since_last_txn'] = self.df.groupby('cst_dim_id')['transdatetime'].diff().dt.total_seconds()
         self.df['time_since_last_txn'] = self.df['time_since_last_txn'].fillna(3600*24*30) # Fill NaNs with large value (first txn)
+
+    def generate_gnn_features(self):
+        """Generates graph embeddings using GraphEmbedderAgent."""
+        logger.info("Generating GNN embeddings...")
+        from src.agents.graph_embedder import GraphEmbedderAgent
+        
+        embedder = GraphEmbedderAgent(self.df)
+        embedder.prepare_graph()
+        embedder.train_embeddings(epochs=30) # Train for a bit longer
+        emb_df = embedder.get_embeddings_df()
+        
+        # Merge embeddings back to main dataframe
+        # We merge on cst_dim_id
+        self.df = self.df.merge(emb_df, on='cst_dim_id', how='left')
+        
+        # Fill NaNs (for new clients not in graph training set, though here we train on current df)
+        gnn_cols = [c for c in emb_df.columns if 'gnn_emb' in c]
+        self.df[gnn_cols] = self.df[gnn_cols].fillna(0)
+
+    def generate_anomaly_features(self):
+        """Generates unsupervised anomaly scores using Isolation Forest."""
+        logger.info("Generating anomaly features (Isolation Forest)...")
+        from sklearn.ensemble import IsolationForest
+        
+        # Select features for anomaly detection
+        # We use a subset of numerical features that likely capture abnormal behavior
+        anomaly_cols = ['amount', 'count_txn_1h', 'time_since_last_txn']
+        
+        # Handle NaNs just in case (though we filled them)
+        X_anomaly = self.df[anomaly_cols].fillna(0)
+        
+        # Fit Isolation Forest
+        # contamination='auto' lets the model decide threshold
+        # IMPORTANT: n_jobs=1 to avoid segfault on macOS ARM64
+        iso_forest = IsolationForest(n_estimators=100, contamination='auto', random_state=42, n_jobs=1)
+        
+        # We want the anomaly score. 
+        # decision_function returns negative for outliers, positive for inliers.
+        # We invert it so higher score = more anomalous.
+        self.df['anomaly_score'] = -iso_forest.fit_predict(X_anomaly) # -1 for outlier, 1 for inlier. This is just labels.
+        self.df['anomaly_score_raw'] = -iso_forest.decision_function(X_anomaly) # Higher = more anomalous
+
 
 if __name__ == "__main__":
     # Test run

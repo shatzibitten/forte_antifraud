@@ -1,0 +1,168 @@
+2025-11-23 21:43:17,095 - INFO - Starting Adversarial Validation...
+2025-11-23 21:43:17,095 - INFO - Loading data...
+2025-11-23 21:43:17,135 - INFO - Loaded behavior data: (8587, 19)
+2025-11-23 21:43:17,135 - INFO - Loaded transactions data: (13113, 7)
+2025-11-23 21:43:17,135 - INFO - Cleaning data...
+2025-11-23 21:43:17,151 - INFO - Merging data...
+2025-11-23 21:43:17,151 - INFO - Transactions dtypes: transdatetime=datetime64[ns], cst_dim_id=int64
+2025-11-23 21:43:17,151 - INFO - Behavior dtypes: transdate=datetime64[ns], cst_dim_id=int64
+2025-11-23 21:43:17,160 - INFO - Merged data shape: (13107, 28)
+2025-11-23 21:43:17,161 - INFO - Generating features...
+2025-11-23 21:43:17,161 - INFO - Generating velocity features...
+2025-11-23 21:43:17,192 - INFO - Generating interaction features...
+2025-11-23 21:43:17,194 - INFO - Generating identity features...
+2025-11-23 21:43:17,200 - INFO - Generating graph features...
+2025-11-23 21:43:17,206 - INFO - Generating time delta features...
+2025-11-23 21:43:17,208 - INFO - Generating GNN embeddings...
+2025-11-23 21:43:17,288 - INFO - Building transaction graph for embeddings...
+2025-11-23 21:43:17,290 - INFO - Graph has 2291 nodes (clients + receivers).
+2025-11-23 21:43:17,295 - INFO - Generating graph embeddings via TruncatedSVD...
+2025-11-23 21:43:17,312 - INFO - Embeddings generated. Explained variance: 0.3792
+2025-11-23 21:43:17,320 - INFO - Generating anomaly features (Isolation Forest)...
+2025-11-23 21:43:17,576 - INFO - Train size: 11141
+2025-11-23 21:43:17,576 - INFO - Holdout size: 1966
+2025-11-23 21:43:17,582 - INFO - Using 35 features for adversarial validation.
+/Users/apolorotov/Desktop/Agents/ForteContest/drift_experiment/adversarial_validation.py:69: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  X[col] = X[col].fillna(0)
+/Users/apolorotov/Desktop/Agents/ForteContest/drift_experiment/adversarial_validation.py:66: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  X[col] = X[col].astype(str)
+/Users/apolorotov/Desktop/Agents/ForteContest/drift_experiment/adversarial_validation.py:67: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  X[col] = X[col].astype('category')
+/Users/apolorotov/Desktop/Agents/ForteContest/drift_experiment/adversarial_validation.py:69: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  X[col] = X[col].fillna(0)
+2025-11-23 21:43:18,305 - INFO - Fold 1 AUC: 0.9384
+2025-11-23 21:43:19,075 - INFO - Fold 2 AUC: 0.9432
+2025-11-23 21:43:19,856 - INFO - Fold 3 AUC: 0.9459
+2025-11-23 21:43:20,635 - INFO - Fold 4 AUC: 0.9423
+2025-11-23 21:43:21,409 - INFO - Fold 5 AUC: 0.9457
+2025-11-23 21:43:21,410 - INFO - 
+Mean Adversarial AUC: 0.9431
+2025-11-23 21:43:21,410 - WARNING - High Adversarial AUC indicates significant drift! The model can easily distinguish Train from Holdout.
+2025-11-23 21:43:21,410 - INFO - 
+Top 10 Drifting Features (Most important for distinguishing Train vs Holdout):
+2025-11-23 21:43:21,410 - INFO -                               total_gain
+zscore_avg_login_interval_7d       215.6
+logins_last_7_days                 200.6
+last_os_categorical                191.2
+avg_amount_30d                     188.4
+amount_per_login_interval          144.8
+time_since_last_txn                137.8
+std_amount_7d                      137.6
+direction_txn_count                135.8
+amount_to_avg_30d                  118.4
+gnn_emb_10                         116.6
+2025-11-23 21:43:23,633 - INFO - Starting Pseudo-Labeling Experiment...
+2025-11-23 21:43:23,633 - INFO - Loading data...
+2025-11-23 21:43:23,671 - INFO - Loaded behavior data: (8587, 19)
+2025-11-23 21:43:23,671 - INFO - Loaded transactions data: (13113, 7)
+2025-11-23 21:43:23,672 - INFO - Cleaning data...
+2025-11-23 21:43:23,682 - INFO - Merging data...
+2025-11-23 21:43:23,682 - INFO - Transactions dtypes: transdatetime=datetime64[ns], cst_dim_id=int64
+2025-11-23 21:43:23,682 - INFO - Behavior dtypes: transdate=datetime64[ns], cst_dim_id=int64
+2025-11-23 21:43:23,686 - INFO - Merged data shape: (13107, 28)
+2025-11-23 21:43:23,687 - INFO - Generating features...
+2025-11-23 21:43:23,687 - INFO - Generating velocity features...
+2025-11-23 21:43:23,717 - INFO - Generating interaction features...
+2025-11-23 21:43:23,718 - INFO - Generating identity features...
+2025-11-23 21:43:23,723 - INFO - Generating graph features...
+2025-11-23 21:43:23,728 - INFO - Generating time delta features...
+2025-11-23 21:43:23,729 - INFO - Generating GNN embeddings...
+2025-11-23 21:43:23,731 - INFO - Building transaction graph for embeddings...
+2025-11-23 21:43:23,733 - INFO - Graph has 2291 nodes (clients + receivers).
+2025-11-23 21:43:23,737 - INFO - Generating graph embeddings via TruncatedSVD...
+2025-11-23 21:43:23,751 - INFO - Embeddings generated. Explained variance: 0.3792
+2025-11-23 21:43:23,757 - INFO - Generating anomaly features (Isolation Forest)...
+2025-11-23 21:43:23,902 - INFO - 
+============================================================
+2025-11-23 21:43:23,902 - INFO - DATA SPLIT:
+2025-11-23 21:43:23,902 - INFO - Train set: 11141
+2025-11-23 21:43:23,902 - INFO - Holdout set: 1966
+2025-11-23 21:43:23,902 - INFO - ============================================================
+
+2025-11-23 21:43:23,902 - INFO - Step 1: Initial Training...
+2025-11-23 21:43:23,908 - INFO - Training final CatBoost model...
+2025-11-23 21:43:29,336 - INFO - Final CatBoost model trained.
+2025-11-23 21:43:29,336 - INFO - Training LightGBM model...
+2025-11-23 21:43:32,382 - INFO - LightGBM model trained.
+2025-11-23 21:43:32,383 - INFO - Training XGBoost model...
+2025-11-23 21:43:33,209 - INFO - XGBoost model trained.
+2025-11-23 21:43:33,209 - INFO - Training Stacking Ensemble (3 base models)...
+2025-11-23 21:43:33,210 - INFO - Generating out-of-fold predictions...
+2025-11-23 21:43:40,191 - INFO - Stacking Meta-Model Coefficients: [[2.02876532 2.38446896 3.18007703]]
+2025-11-23 21:43:40,192 - INFO - 
+============================================================
+2025-11-23 21:43:40,192 - INFO - Step 2: Generating Pseudo-Labels...
+2025-11-23 21:43:40,192 - INFO - ============================================================
+0:	total: 69ms	remaining: 1m 8s
+100:	total: 638ms	remaining: 5.68s
+200:	total: 1.19s	remaining: 4.72s
+300:	total: 1.72s	remaining: 4s
+400:	total: 2.26s	remaining: 3.37s
+500:	total: 2.78s	remaining: 2.77s
+600:	total: 3.3s	remaining: 2.19s
+700:	total: 3.81s	remaining: 1.63s
+800:	total: 4.34s	remaining: 1.08s
+900:	total: 4.86s	remaining: 534ms
+999:	total: 5.37s	remaining: 0us
+Traceback (most recent call last):
+  File "/Users/apolorotov/Desktop/Agents/ForteContest/drift_experiment/main.py", line 131, in <module>
+    main()
+    ~~~~^^
+  File "/Users/apolorotov/Desktop/Agents/ForteContest/drift_experiment/main.py", line 68, in main
+    architect.lgbm_model.predict_proba(holdout_architect.df[architect.model_features])[:, 1],
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/apolorotov/Desktop/Agents/ForteContest/venv/lib/python3.13/site-packages/lightgbm/sklearn.py", line 1627, in predict_proba
+    result = super().predict(
+        X=X,
+    ...<6 lines>...
+        **kwargs,
+    )
+  File "/Users/apolorotov/Desktop/Agents/ForteContest/venv/lib/python3.13/site-packages/lightgbm/sklearn.py", line 1144, in predict
+    return self._Booster.predict(  # type: ignore[union-attr]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        X,
+        ^^
+    ...<6 lines>...
+        **predict_params,
+        ^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/apolorotov/Desktop/Agents/ForteContest/venv/lib/python3.13/site-packages/lightgbm/basic.py", line 4767, in predict
+    return predictor.predict(
+           ~~~~~~~~~~~~~~~~~^
+        data=data,
+        ^^^^^^^^^^
+    ...<6 lines>...
+        validate_features=validate_features,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/apolorotov/Desktop/Agents/ForteContest/venv/lib/python3.13/site-packages/lightgbm/basic.py", line 1158, in predict
+    data = _data_from_pandas(
+           ~~~~~~~~~~~~~~~~~^
+        data=data,
+        ^^^^^^^^^^
+    ...<2 lines>...
+        pandas_categorical=self.pandas_categorical,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )[0]
+    ^
+  File "/Users/apolorotov/Desktop/Agents/ForteContest/venv/lib/python3.13/site-packages/lightgbm/basic.py", line 851, in _data_from_pandas
+    raise ValueError("train and valid dataset categorical_feature do not match.")
+ValueError: train and valid dataset categorical_feature do not match.

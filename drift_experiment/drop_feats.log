@@ -1,0 +1,202 @@
+2025-11-23 21:41:54,621 - INFO - Starting Adversarial Validation...
+2025-11-23 21:41:54,621 - INFO - Loading data...
+2025-11-23 21:41:54,676 - INFO - Loaded behavior data: (8587, 19)
+2025-11-23 21:41:54,677 - INFO - Loaded transactions data: (13113, 7)
+2025-11-23 21:41:54,677 - INFO - Cleaning data...
+2025-11-23 21:41:54,696 - INFO - Merging data...
+2025-11-23 21:41:54,696 - INFO - Transactions dtypes: transdatetime=datetime64[ns], cst_dim_id=int64
+2025-11-23 21:41:54,696 - INFO - Behavior dtypes: transdate=datetime64[ns], cst_dim_id=int64
+2025-11-23 21:41:54,702 - INFO - Merged data shape: (13107, 28)
+2025-11-23 21:41:54,703 - INFO - Generating features...
+2025-11-23 21:41:54,703 - INFO - Generating velocity features...
+2025-11-23 21:41:54,735 - INFO - Generating interaction features...
+2025-11-23 21:41:54,737 - INFO - Generating identity features...
+2025-11-23 21:41:54,741 - INFO - Generating graph features...
+2025-11-23 21:41:54,747 - INFO - Generating time delta features...
+2025-11-23 21:41:54,748 - INFO - Generating GNN embeddings...
+2025-11-23 21:41:54,825 - INFO - Building transaction graph for embeddings...
+2025-11-23 21:41:54,827 - INFO - Graph has 2291 nodes (clients + receivers).
+2025-11-23 21:41:54,831 - INFO - Generating graph embeddings via TruncatedSVD...
+2025-11-23 21:41:54,847 - INFO - Embeddings generated. Explained variance: 0.3792
+2025-11-23 21:41:54,853 - INFO - Generating anomaly features (Isolation Forest)...
+2025-11-23 21:41:55,102 - INFO - Train size: 11141
+2025-11-23 21:41:55,102 - INFO - Holdout size: 1966
+2025-11-23 21:41:55,110 - INFO - Using 35 features for adversarial validation.
+/Users/apolorotov/Desktop/Agents/ForteContest/drift_experiment/adversarial_validation.py:69: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  X[col] = X[col].fillna(0)
+/Users/apolorotov/Desktop/Agents/ForteContest/drift_experiment/adversarial_validation.py:66: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  X[col] = X[col].astype(str)
+/Users/apolorotov/Desktop/Agents/ForteContest/drift_experiment/adversarial_validation.py:67: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  X[col] = X[col].astype('category')
+/Users/apolorotov/Desktop/Agents/ForteContest/drift_experiment/adversarial_validation.py:69: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  X[col] = X[col].fillna(0)
+2025-11-23 21:41:55,911 - INFO - Fold 1 AUC: 0.9384
+2025-11-23 21:41:56,672 - INFO - Fold 2 AUC: 0.9432
+2025-11-23 21:41:57,428 - INFO - Fold 3 AUC: 0.9458
+2025-11-23 21:41:58,115 - INFO - Fold 4 AUC: 0.9423
+2025-11-23 21:41:58,787 - INFO - Fold 5 AUC: 0.9457
+2025-11-23 21:41:58,787 - INFO - 
+Mean Adversarial AUC: 0.9431
+2025-11-23 21:41:58,787 - WARNING - High Adversarial AUC indicates significant drift! The model can easily distinguish Train from Holdout.
+2025-11-23 21:41:58,787 - INFO - 
+Top 10 Drifting Features (Most important for distinguishing Train vs Holdout):
+2025-11-23 21:41:58,787 - INFO -                               total_gain
+zscore_avg_login_interval_7d       216.4
+logins_last_7_days                 199.8
+last_os_categorical                191.2
+avg_amount_30d                     188.4
+amount_per_login_interval          145.0
+time_since_last_txn                137.8
+std_amount_7d                      137.6
+direction_txn_count                135.2
+gnn_emb_7                          121.2
+amount_to_avg_30d                  118.4
+2025-11-23 21:42:00,659 - INFO - Starting ForteBank AI Hackathon Pipeline...
+2025-11-23 21:42:00,659 - INFO - Loading data...
+2025-11-23 21:42:00,696 - INFO - Loaded behavior data: (8587, 19)
+2025-11-23 21:42:00,696 - INFO - Loaded transactions data: (13113, 7)
+2025-11-23 21:42:00,696 - INFO - Cleaning data...
+2025-11-23 21:42:00,707 - INFO - Merging data...
+2025-11-23 21:42:00,707 - INFO - Transactions dtypes: transdatetime=datetime64[ns], cst_dim_id=int64
+2025-11-23 21:42:00,707 - INFO - Behavior dtypes: transdate=datetime64[ns], cst_dim_id=int64
+2025-11-23 21:42:00,711 - INFO - Merged data shape: (13107, 28)
+2025-11-23 21:42:00,712 - INFO - Generating features...
+2025-11-23 21:42:00,712 - INFO - Generating velocity features...
+2025-11-23 21:42:00,743 - INFO - Generating interaction features...
+2025-11-23 21:42:00,744 - INFO - Generating identity features...
+2025-11-23 21:42:00,748 - INFO - Generating graph features...
+2025-11-23 21:42:00,754 - INFO - Generating time delta features...
+2025-11-23 21:42:00,754 - INFO - Generating GNN embeddings...
+2025-11-23 21:42:00,758 - INFO - Building transaction graph for embeddings...
+2025-11-23 21:42:00,761 - INFO - Graph has 2291 nodes (clients + receivers).
+2025-11-23 21:42:00,765 - INFO - Generating graph embeddings via TruncatedSVD...
+2025-11-23 21:42:00,778 - INFO - Embeddings generated. Explained variance: 0.3792
+2025-11-23 21:42:00,784 - INFO - Generating anomaly features (Isolation Forest)...
+2025-11-23 21:42:00,927 - INFO - 
+============================================================
+2025-11-23 21:42:00,927 - INFO - DATA SPLIT:
+2025-11-23 21:42:00,928 - INFO - Train set: 11141 transactions (2024-11-30 05:45:05 to 2025-07-07 15:19:13)
+2025-11-23 21:42:00,929 - INFO - Holdout set: 1966 transactions (2025-07-07 15:24:01 to 2025-08-29 22:12:01)
+2025-11-23 21:42:00,929 - INFO - Train fraud rate: 0.0056
+2025-11-23 21:42:00,929 - INFO - Holdout fraud rate: 0.0524
+2025-11-23 21:42:00,929 - INFO - ============================================================
+
+2025-11-23 21:42:00,934 - INFO - 
+============================================================
+2025-11-23 21:42:00,934 - INFO - TRAINING MODELS (Optuna disabled for speed)
+2025-11-23 21:42:00,934 - INFO - ============================================================
+
+2025-11-23 21:42:00,934 - INFO - Training final CatBoost model...
+2025-11-23 21:42:06,257 - INFO - Final CatBoost model trained.
+2025-11-23 21:42:06,257 - INFO - Training LightGBM model...
+2025-11-23 21:42:09,273 - INFO - LightGBM model trained.
+2025-11-23 21:42:09,274 - INFO - Training XGBoost model...
+2025-11-23 21:42:10,097 - INFO - XGBoost model trained.
+2025-11-23 21:42:10,098 - INFO - Training Stacking Ensemble (3 base models)...
+2025-11-23 21:42:10,098 - INFO - Generating out-of-fold predictions...
+2025-11-23 21:42:16,928 - INFO - Stacking Meta-Model Coefficients: [[1.79292571 2.121426   3.33281799]]
+2025-11-23 21:42:16,929 - INFO - Saving models to models/...
+2025-11-23 21:42:16,954 - INFO - Models saved successfully.
+2025-11-23 21:42:16,954 - INFO - Generating SHAP explanations...
+2025-11-23 21:42:16,957 - INFO - Generating SHAP explanation...
+2025-11-23 21:42:17,692 - INFO - SHAP summary saved to shap_summary.png
+2025-11-23 21:42:17,693 - INFO - 
+============================================================
+2025-11-23 21:42:17,693 - INFO - TRAIN SET METRICS (reference only):
+2025-11-23 21:42:17,693 - INFO - ============================================================
+2025-11-23 21:42:17,694 - INFO - Calculating business metrics...
+2025-11-23 21:42:17,813 - INFO - Saved Money: 21,048,997.37
+2025-11-23 21:42:17,813 - INFO - Lost Money: 0.00
+2025-11-23 21:42:17,813 - INFO - Blocked Legit Money: 0.00
+2025-11-23 21:42:17,813 - INFO - 
+============================================================
+2025-11-23 21:42:17,813 - INFO - HOLDOUT TEST SET METRICS (final evaluation):
+2025-11-23 21:42:17,813 - INFO - ============================================================
+2025-11-23 21:42:17,815 - INFO - Analyzing data drift...
+2025-11-23 21:42:17,818 - INFO - 
+============================================================
+2025-11-23 21:42:17,818 - INFO - TOP 10 DRIFTING FEATURES:
+2025-11-23 21:42:17,818 - INFO - ============================================================
+2025-11-23 21:42:17,818 - INFO - monthly_os_changes: score=0.3655 (Train: 1.38 -> Holdout: 1.12)
+2025-11-23 21:42:17,818 - INFO - monthly_phone_model_changes: score=0.3162 (Train: 1.32 -> Holdout: 1.13)
+2025-11-23 21:42:17,818 - INFO - high_risk_device: score=0.2736 (Train: 0.31 -> Holdout: 0.18)
+2025-11-23 21:42:17,818 - INFO - is_fake_os: score=0.2185 (Train: 0.00 -> Holdout: 0.01)
+2025-11-23 21:42:17,818 - INFO - zscore_avg_login_interval_7d: score=0.2082 (Train: -0.19 -> Holdout: -0.30)
+2025-11-23 21:42:17,818 - INFO - logins_last_7_days: score=0.1656 (Train: 12.08 -> Holdout: 9.95)
+2025-11-23 21:42:17,818 - INFO - direction_txn_count: score=0.1529 (Train: 59.25 -> Holdout: 50.03)
+2025-11-23 21:42:17,818 - INFO - time_since_last_txn: score=0.1516 (Train: 408746.53 -> Holdout: 532849.48)
+2025-11-23 21:42:17,818 - INFO - gnn_emb_7: score=0.1493 (Train: 4.12 -> Holdout: 0.00)
+2025-11-23 21:42:17,818 - INFO - gnn_emb_6: score=0.1493 (Train: 1.40 -> Holdout: 0.00)
+2025-11-23 21:42:17,818 - INFO - ============================================================
+
+2025-11-23 21:42:17,818 - INFO - 
+============================================================
+2025-11-23 21:42:17,818 - INFO - LLM EXPLAINER AGENT (Top 3 Suspicious Cases in Holdout)
+2025-11-23 21:42:17,818 - INFO - ============================================================
+2025-11-23 21:42:17,819 - INFO - Generating explanations for top 3 fraud cases...
+2025-11-23 21:42:17,903 - INFO - 
+### Case #1 (Transaction ID: 12000)
+**Risk Score:** 0.9848
+**Key Risk Factors:**
+- **direction_txn_count**: 1.00
+- **amount_to_avg_30d**: 15.14
+- **Transaction Amount**: 301257.00
+
+
+### Case #2 (Transaction ID: 11757)
+**Risk Score:** 0.9686
+**Key Risk Factors:**
+- **direction_txn_count**: 1.00
+- **amount_to_avg_30d**: 23.12
+- **Transaction Amount**: 500000.00
+
+
+### Case #3 (Transaction ID: 12363)
+**Risk Score:** 0.9465
+**Key Risk Factors:**
+- **direction_txn_count**: 1.00
+- **amount_to_avg_30d**: 111.84
+- **Transaction Amount**: 500000.00
+
+2025-11-23 21:42:17,903 - INFO - ============================================================
+
+2025-11-23 21:42:17,904 - INFO - Calculating business metrics...
+2025-11-23 21:42:17,930 - INFO - Saved Money: 931,257.00
+2025-11-23 21:42:17,930 - INFO - Lost Money: 15,086,900.00
+2025-11-23 21:42:17,930 - INFO - Blocked Legit Money: 997,600.00
+2025-11-23 21:42:17,930 - INFO - 
+============================================================
+2025-11-23 21:42:17,930 - INFO - SUMMARY:
+2025-11-23 21:42:17,930 - INFO - ============================================================
+2025-11-23 21:42:17,930 - INFO - Train Set Saved: 21,048,997.37 KZT
+2025-11-23 21:42:17,930 - INFO - Holdout Set Saved: 931,257.00 KZT
+2025-11-23 21:42:17,930 - INFO - Holdout Set Lost: 15,086,900.00 KZT
+2025-11-23 21:42:17,930 - INFO - ============================================================
+
+0:	total: 68ms	remaining: 1m 7s
+100:	total: 616ms	remaining: 5.48s
+200:	total: 1.16s	remaining: 4.59s
+300:	total: 1.67s	remaining: 3.88s
+400:	total: 2.18s	remaining: 3.26s
+500:	total: 2.7s	remaining: 2.69s
+600:	total: 3.22s	remaining: 2.14s
+700:	total: 3.73s	remaining: 1.59s
+800:	total: 4.25s	remaining: 1.05s
+900:	total: 4.76s	remaining: 523ms
+999:	total: 5.27s	remaining: 0us

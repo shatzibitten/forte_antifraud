@@ -1,0 +1,148 @@
+2025-11-23 21:44:49,029 - INFO - Starting Adversarial Validation...
+2025-11-23 21:44:49,029 - INFO - Loading data...
+2025-11-23 21:44:49,070 - INFO - Loaded behavior data: (8587, 19)
+2025-11-23 21:44:49,070 - INFO - Loaded transactions data: (13113, 7)
+2025-11-23 21:44:49,070 - INFO - Cleaning data...
+2025-11-23 21:44:49,087 - INFO - Merging data...
+2025-11-23 21:44:49,087 - INFO - Transactions dtypes: transdatetime=datetime64[ns], cst_dim_id=int64
+2025-11-23 21:44:49,087 - INFO - Behavior dtypes: transdate=datetime64[ns], cst_dim_id=int64
+2025-11-23 21:44:49,093 - INFO - Merged data shape: (13107, 28)
+2025-11-23 21:44:49,094 - INFO - Generating features...
+2025-11-23 21:44:49,094 - INFO - Generating velocity features...
+2025-11-23 21:44:49,126 - INFO - Generating interaction features...
+2025-11-23 21:44:49,128 - INFO - Generating identity features...
+2025-11-23 21:44:49,132 - INFO - Generating graph features...
+2025-11-23 21:44:49,139 - INFO - Generating time delta features...
+2025-11-23 21:44:49,141 - INFO - Generating GNN embeddings...
+2025-11-23 21:44:49,220 - INFO - Building transaction graph for embeddings...
+2025-11-23 21:44:49,223 - INFO - Graph has 2291 nodes (clients + receivers).
+2025-11-23 21:44:49,227 - INFO - Generating graph embeddings via TruncatedSVD...
+2025-11-23 21:44:49,245 - INFO - Embeddings generated. Explained variance: 0.3792
+2025-11-23 21:44:49,254 - INFO - Generating anomaly features (Isolation Forest)...
+2025-11-23 21:44:49,515 - INFO - Train size: 11141
+2025-11-23 21:44:49,515 - INFO - Holdout size: 1966
+2025-11-23 21:44:49,527 - INFO - Using 39 features for adversarial validation.
+/Users/apolorotov/Desktop/Agents/ForteContest/drift_experiment/adversarial_validation.py:69: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  X[col] = X[col].fillna(0)
+/Users/apolorotov/Desktop/Agents/ForteContest/drift_experiment/adversarial_validation.py:66: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  X[col] = X[col].astype(str)
+/Users/apolorotov/Desktop/Agents/ForteContest/drift_experiment/adversarial_validation.py:67: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  X[col] = X[col].astype('category')
+/Users/apolorotov/Desktop/Agents/ForteContest/drift_experiment/adversarial_validation.py:69: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  X[col] = X[col].fillna(0)
+/Users/apolorotov/Desktop/Agents/ForteContest/drift_experiment/adversarial_validation.py:66: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  X[col] = X[col].astype(str)
+/Users/apolorotov/Desktop/Agents/ForteContest/drift_experiment/adversarial_validation.py:67: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  X[col] = X[col].astype('category')
+/Users/apolorotov/Desktop/Agents/ForteContest/drift_experiment/adversarial_validation.py:69: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  X[col] = X[col].fillna(0)
+2025-11-23 21:44:50,450 - INFO - Fold 1 AUC: 0.9686
+2025-11-23 21:44:51,442 - INFO - Fold 2 AUC: 0.9729
+2025-11-23 21:44:52,406 - INFO - Fold 3 AUC: 0.9746
+2025-11-23 21:44:53,097 - INFO - Fold 4 AUC: 0.9730
+2025-11-23 21:44:54,422 - INFO - Fold 5 AUC: 0.9750
+2025-11-23 21:44:54,422 - INFO - 
+Mean Adversarial AUC: 0.9728
+2025-11-23 21:44:54,423 - WARNING - High Adversarial AUC indicates significant drift! The model can easily distinguish Train from Holdout.
+2025-11-23 21:44:54,424 - INFO - 
+Top 10 Drifting Features (Most important for distinguishing Train vs Holdout):
+2025-11-23 21:44:54,424 - INFO -                               total_gain
+last_phone_model_categorical       357.2
+burstiness_login_interval          297.2
+fano_factor_login_interval         294.8
+logins_last_30_days                265.2
+avg_amount_30d                     141.8
+last_os_categorical                119.2
+zscore_avg_login_interval_7d       117.6
+logins_last_7_days                 106.0
+time_since_last_txn                 99.8
+std_amount_7d                       97.8
+2025-11-23 21:44:56,572 - INFO - Starting Pseudo-Labeling Experiment...
+2025-11-23 21:44:56,572 - INFO - Loading data...
+2025-11-23 21:44:56,608 - INFO - Loaded behavior data: (8587, 19)
+2025-11-23 21:44:56,608 - INFO - Loaded transactions data: (13113, 7)
+2025-11-23 21:44:56,608 - INFO - Cleaning data...
+2025-11-23 21:44:56,618 - INFO - Merging data...
+2025-11-23 21:44:56,618 - INFO - Transactions dtypes: transdatetime=datetime64[ns], cst_dim_id=int64
+2025-11-23 21:44:56,618 - INFO - Behavior dtypes: transdate=datetime64[ns], cst_dim_id=int64
+2025-11-23 21:44:56,621 - INFO - Merged data shape: (13107, 28)
+2025-11-23 21:44:56,622 - INFO - Generating features...
+2025-11-23 21:44:56,622 - INFO - Generating velocity features...
+2025-11-23 21:44:56,652 - INFO - Generating interaction features...
+2025-11-23 21:44:56,653 - INFO - Generating identity features...
+2025-11-23 21:44:56,657 - INFO - Generating graph features...
+2025-11-23 21:44:56,663 - INFO - Generating time delta features...
+2025-11-23 21:44:56,664 - INFO - Generating GNN embeddings...
+2025-11-23 21:44:56,666 - INFO - Building transaction graph for embeddings...
+2025-11-23 21:44:56,669 - INFO - Graph has 2291 nodes (clients + receivers).
+2025-11-23 21:44:56,673 - INFO - Generating graph embeddings via TruncatedSVD...
+2025-11-23 21:44:56,686 - INFO - Embeddings generated. Explained variance: 0.3792
+2025-11-23 21:44:56,692 - INFO - Generating anomaly features (Isolation Forest)...
+2025-11-23 21:44:56,844 - INFO - 
+============================================================
+2025-11-23 21:44:56,844 - INFO - DATA SPLIT:
+2025-11-23 21:44:56,844 - INFO - Train set: 11141
+2025-11-23 21:44:56,844 - INFO - Holdout set: 1966
+2025-11-23 21:44:56,844 - INFO - ============================================================
+
+2025-11-23 21:44:56,844 - INFO - Step 1: Initial Training...
+2025-11-23 21:44:56,855 - INFO - Training final CatBoost model...
+2025-11-23 21:45:05,503 - INFO - Final CatBoost model trained.
+2025-11-23 21:45:05,504 - INFO - Training LightGBM model...
+2025-11-23 21:45:08,501 - INFO - LightGBM model trained.
+2025-11-23 21:45:08,501 - INFO - Training XGBoost model...
+2025-11-23 21:45:09,427 - INFO - XGBoost model trained.
+2025-11-23 21:45:09,427 - INFO - Training Stacking Ensemble (3 base models)...
+2025-11-23 21:45:09,428 - INFO - Generating out-of-fold predictions...
+2025-11-23 21:45:17,744 - INFO - Stacking Meta-Model Coefficients: [[1.84705915 0.52721516 3.38138845]]
+2025-11-23 21:45:17,746 - INFO - 
+============================================================
+2025-11-23 21:45:17,746 - INFO - Step 2: Generating Pseudo-Labels...
+2025-11-23 21:45:17,746 - INFO - ============================================================
+0:	total: 67.6ms	remaining: 1m 7s
+100:	total: 1.19s	remaining: 10.6s
+200:	total: 2.93s	remaining: 11.7s
+300:	total: 3.67s	remaining: 8.52s
+400:	total: 4.32s	remaining: 6.46s
+500:	total: 5.02s	remaining: 5s
+600:	total: 5.68s	remaining: 3.77s
+700:	total: 6.46s	remaining: 2.75s
+800:	total: 7.3s	remaining: 1.81s
+900:	total: 7.94s	remaining: 872ms
+999:	total: 8.58s	remaining: 0us
+Traceback (most recent call last):
+  File "/Users/apolorotov/Desktop/Agents/ForteContest/drift_experiment/main.py", line 131, in <module>
+    main()
+    ~~~~^^
+  File "/Users/apolorotov/Desktop/Agents/ForteContest/drift_experiment/main.py", line 71, in main
+    probs = architect.stacking_model.predict_proba(meta_features)[:, 1]
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ModelArchitectAgent' object has no attribute 'stacking_model'

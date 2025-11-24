@@ -8,14 +8,15 @@ from src.agents.model_architect import ModelArchitectAgent
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-def run_inference(transactions_path, behavior_path, output_path='predictions.csv'):
-    logger.info(f"Starting inference on {transactions_path}...")
+def run_inference(transactions_path, behavior_path, model_dir='models/', output_path='predictions.csv', skiprows=1):
+    logger.info(f"Starting inference on {transactions_path} using models from {model_dir}...")
     
     # 1. Load and Prepare Data
     # We reuse DataSteward to ensure same preprocessing logic
     steward = DataStewardAgent(
         behavior_path=behavior_path,
-        transactions_path=transactions_path
+        transactions_path=transactions_path,
+        skiprows_transactions=skiprows
     )
     steward.load_data()
     steward.clean_data()
@@ -29,10 +30,11 @@ def run_inference(transactions_path, behavior_path, output_path='predictions.csv
     # 3. Load Models and Predict
     architect = ModelArchitectAgent(features_df)
     architect.prepare_data()
-    architect.load_models(path='models/')
+    architect.load_models(path=model_dir)
     
     logger.info("Predicting...")
-    probs = architect.predict_stacking_inference(features_df[architect.model_features])
+    # Pass all features, architect will filter based on model needs
+    probs = architect.predict_stacking_inference(architect.df)
     
     # 4. Save Results
     results = pd.DataFrame({
@@ -43,6 +45,10 @@ def run_inference(transactions_path, behavior_path, output_path='predictions.csv
         'is_fraud_prediction': (probs > 0.5).astype(int)
     })
     
+    # Add target if it exists in source for evaluation
+    if 'target' in merged_df.columns:
+        results['target'] = merged_df['target']
+    
     results.to_csv(output_path, index=False)
     logger.info(f"Predictions saved to {output_path}")
 
@@ -50,8 +56,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run fraud detection inference on new data.')
     parser.add_argument('--transactions', type=str, required=True, help='Path to new transactions CSV')
     parser.add_argument('--behavior', type=str, required=True, help='Path to behavior CSV (can be same as training or updated)')
+    parser.add_argument('--model_dir', type=str, default='models/', help='Directory containing trained models')
     parser.add_argument('--output', type=str, default='predictions.csv', help='Output path for predictions')
+    parser.add_argument('--skiprows', type=int, default=1, help='Number of rows to skip in transactions file (default 1 for original data, 0 for clean csv)')
     
     args = parser.parse_args()
     
-    run_inference(args.transactions, args.behavior, args.output)
+    run_inference(args.transactions, args.behavior, args.model_dir, args.output, args.skiprows)

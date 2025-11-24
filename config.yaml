@@ -1,0 +1,24 @@
+# ForteBank AI Hackathon - Configuration File
+
+# Fraud Detection Threshold
+# Transactions with probability > threshold will be blocked
+# Default: 0.5 (Balanced)
+# Aggressive: 0.3 (Catch more fraud, more false positives)
+# Conservative: 0.7 (Fewer false positives, might miss fraud)
+fraud_threshold: 0.5
+
+# Retraining Settings
+retraining:
+  enabled: true
+  cycle_days: 14  # Retrain every 2 weeks
+  
+# Feature Engineering
+features:
+  use_gnn: true
+  use_behavior: true
+  
+# Model Hyperparameters (Global overrides)
+model:
+  use_optuna: false  # Set to true for hyperparameter optimization (slower but may improve results)
+  random_state: 42
+  n_jobs: -1

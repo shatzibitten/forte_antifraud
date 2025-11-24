@@ -1,4 +1,55 @@
-.DS_Store
-node_modules/
+# Виртуальное окружение
+venv/
+env/
 .env
-.gemini/
+
+# Agent configuration (keep this in repository!)
+# .agent/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Модели и предсказания
+models/
+models_iso/
+*.cbm
+*.txt
+*.joblib
+predictions_*.csv
+
+# Логи и отладка
+debug_log.txt
+run_log.txt
+raw_lines*.txt
+cols.txt
+
+# Графики и изображения
+*.png
+*.jpg
+*.jpeg
+
+# Датасеты (если не нужны в репозитории)
+# datasets/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+*.ipynb
+
+# PDF и текстовые извлечения
+pdf_content.txt

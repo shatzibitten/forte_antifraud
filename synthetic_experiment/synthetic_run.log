@@ -1,0 +1,134 @@
+/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python: can't open file '/Users/apolorotov/Desktop/Agents/ForteContest/synthetic_experiment/main.pyЗапускаем': [Errno 2] No such file or directory
+2025-11-23 21:36:59,678 - INFO - Starting Synthetic Data Experiment...
+2025-11-23 21:36:59,678 - INFO - 
+============================================================
+2025-11-23 21:36:59,678 - INFO - PHASE 1: Training on FULL Original Dataset (No Holdout)
+2025-11-23 21:36:59,678 - INFO - ============================================================
+2025-11-23 21:36:59,678 - INFO - Loading data...
+2025-11-23 21:36:59,720 - INFO - Loaded behavior data: (8587, 19)
+2025-11-23 21:36:59,720 - INFO - Loaded transactions data: (13113, 7)
+2025-11-23 21:36:59,720 - INFO - Cleaning data...
+2025-11-23 21:36:59,733 - INFO - Merging data...
+2025-11-23 21:36:59,733 - INFO - Transactions dtypes: transdatetime=datetime64[ns], cst_dim_id=int64
+2025-11-23 21:36:59,734 - INFO - Behavior dtypes: transdate=datetime64[ns], cst_dim_id=int64
+2025-11-23 21:36:59,741 - INFO - Merged data shape: (13107, 28)
+2025-11-23 21:36:59,742 - INFO - Generating features...
+2025-11-23 21:36:59,742 - INFO - Generating velocity features...
+2025-11-23 21:36:59,780 - INFO - Generating interaction features...
+2025-11-23 21:36:59,782 - INFO - Generating identity features...
+2025-11-23 21:36:59,786 - INFO - Generating graph features...
+2025-11-23 21:36:59,793 - INFO - Generating time delta features...
+2025-11-23 21:36:59,795 - INFO - Generating GNN embeddings...
+2025-11-23 21:36:59,798 - INFO - Building transaction graph for embeddings...
+2025-11-23 21:36:59,800 - INFO - Graph has 2291 nodes (clients + receivers).
+2025-11-23 21:36:59,805 - INFO - Generating graph embeddings via TruncatedSVD...
+2025-11-23 21:36:59,824 - INFO - Embeddings generated. Explained variance: 0.3792
+2025-11-23 21:36:59,832 - INFO - Generating anomaly features (Isolation Forest)...
+2025-11-23 21:36:59,973 - INFO - Full Training Data: 13107 transactions
+2025-11-23 21:36:59,974 - INFO - Training Period: 2024-11-30 05:45:05 to 2025-08-29 22:12:01
+2025-11-23 21:36:59,986 - INFO - Training models on full dataset...
+2025-11-23 21:36:59,986 - INFO - Training final CatBoost model...
+2025-11-23 21:37:06,547 - INFO - Final CatBoost model trained.
+2025-11-23 21:37:06,548 - INFO - Training LightGBM model...
+2025-11-23 21:37:11,593 - INFO - LightGBM model trained.
+2025-11-23 21:37:11,593 - INFO - Training XGBoost model...
+2025-11-23 21:37:13,007 - INFO - XGBoost model trained.
+2025-11-23 21:37:13,008 - INFO - Training Stacking Ensemble (3 base models)...
+2025-11-23 21:37:13,009 - INFO - Generating out-of-fold predictions...
+2025-11-23 21:37:21,316 - INFO - Stacking Meta-Model Coefficients: [[3.59593527 1.84125855 3.32509943]]
+2025-11-23 21:37:21,318 - INFO - Saving models to models/...
+2025-11-23 21:37:21,352 - INFO - Models saved successfully.
+2025-11-23 21:37:21,352 - INFO - 
+============================================================
+2025-11-23 21:37:21,352 - INFO - PHASE 2: Evaluating on Synthetic Data
+2025-11-23 21:37:21,352 - INFO - ============================================================
+2025-11-23 21:37:21,352 - INFO - Loading data...
+2025-11-23 21:37:21,622 - INFO - Loaded behavior data: (98604, 19)
+2025-11-23 21:37:21,622 - INFO - Loaded transactions data: (99451, 7)
+2025-11-23 21:37:21,622 - INFO - Cleaning data...
+2025-11-23 21:37:21,670 - INFO - Merging data...
+2025-11-23 21:37:21,670 - INFO - Transactions dtypes: transdatetime=datetime64[ns], cst_dim_id=int64
+2025-11-23 21:37:21,670 - INFO - Behavior dtypes: transdate=datetime64[ns], cst_dim_id=int64
+2025-11-23 21:37:21,697 - INFO - Merged data shape: (99451, 28)
+2025-11-23 21:37:21,708 - INFO - Generating features...
+2025-11-23 21:37:21,708 - INFO - Generating velocity features...
+2025-11-23 21:37:22,227 - INFO - Generating interaction features...
+2025-11-23 21:37:22,230 - INFO - Generating identity features...
+2025-11-23 21:37:22,262 - INFO - Generating graph features...
+2025-11-23 21:37:22,337 - INFO - Generating time delta features...
+2025-11-23 21:37:22,341 - INFO - Generating GNN embeddings...
+2025-11-23 21:37:22,356 - INFO - Building transaction graph for embeddings...
+2025-11-23 21:37:22,386 - INFO - Graph has 43589 nodes (clients + receivers).
+2025-11-23 21:37:22,442 - INFO - Generating graph embeddings via TruncatedSVD...
+2025-11-23 21:37:22,701 - INFO - Embeddings generated. Explained variance: 0.0041
+2025-11-23 21:37:22,777 - INFO - Generating anomaly features (Isolation Forest)...
+2025-11-23 21:37:23,429 - INFO - Synthetic Test Data: 99451 transactions
+2025-11-23 21:37:23,510 - INFO - 
+============================================================
+2025-11-23 21:37:23,510 - INFO - SYNTHETIC DATA METRICS:
+2025-11-23 21:37:23,510 - INFO - ============================================================
+2025-11-23 21:37:23,536 - INFO - Calculating business metrics...
+2025-11-23 21:37:25,094 - INFO - Saved Money: 177,919,705.46
+2025-11-23 21:37:25,094 - INFO - Lost Money: 261,667,499.23
+2025-11-23 21:37:25,094 - INFO - Blocked Legit Money: 38,843,230.00
+2025-11-23 21:37:25,094 - INFO - 
+============================================================
+2025-11-23 21:37:25,094 - INFO - DRIFT ANALYSIS (Original vs Synthetic):
+2025-11-23 21:37:25,094 - INFO - ============================================================
+2025-11-23 21:37:25,102 - INFO - Analyzing data drift...
+2025-11-23 21:37:25,111 - INFO - 
+============================================================
+2025-11-23 21:37:25,111 - INFO - TOP 10 DRIFTING FEATURES:
+2025-11-23 21:37:25,111 - INFO - ============================================================
+2025-11-23 21:37:25,112 - INFO - time_since_last_txn: score=2.5697 (Train: 427361.50 -> Holdout: 2788563.66)
+2025-11-23 21:37:25,112 - INFO - direction_fan_in: score=2.1047 (Train: 1.01 -> Holdout: 1.29)
+2025-11-23 21:37:25,112 - INFO - monthly_phone_model_changes: score=1.5752 (Train: 1.29 -> Holdout: 0.37)
+2025-11-23 21:37:25,112 - INFO - monthly_os_changes: score=1.4813 (Train: 1.34 -> Holdout: 0.33)
+2025-11-23 21:37:25,112 - INFO - direction_txn_count: score=0.8942 (Train: 57.87 -> Holdout: 4.32)
+2025-11-23 21:37:25,112 - INFO - fano_factor_login_interval: score=0.8383 (Train: 233743.19 -> Holdout: 12.19)
+2025-11-23 21:37:25,112 - INFO - burstiness_login_interval: score=0.7948 (Train: 0.17 -> Holdout: 0.01)
+2025-11-23 21:37:25,112 - INFO - high_risk_device: score=0.5510 (Train: 0.29 -> Holdout: 0.04)
+2025-11-23 21:37:25,112 - INFO - logins_last_30_days: score=0.5134 (Train: 43.70 -> Holdout: 64.91)
+2025-11-23 21:37:25,112 - INFO - std_amount_7d: score=0.3423 (Train: 33911.56 -> Holdout: 5523.73)
+2025-11-23 21:37:25,112 - INFO - ============================================================
+
+2025-11-23 21:37:25,112 - INFO - 
+============================================================
+2025-11-23 21:37:25,112 - INFO - LLM EXPLAINER (Top 3 Suspicious Synthetic Cases)
+2025-11-23 21:37:25,112 - INFO - ============================================================
+2025-11-23 21:37:25,135 - INFO - Generating explanations for top 3 fraud cases...
+2025-11-23 21:37:25,309 - INFO - 
+### Case #1 (Transaction ID: 57494)
+**Risk Score:** 0.9924
+**Key Risk Factors:**
+- **direction_txn_count**: 1.00
+- **Transaction Amount**: 525163.87
+- **amount_to_avg_30d**: 481.80
+
+
+### Case #2 (Transaction ID: 57486)
+**Risk Score:** 0.9923
+**Key Risk Factors:**
+- **direction_txn_count**: 1.00
+- **Transaction Amount**: 512938.89
+- **amount_to_avg_30d**: 60.06
+
+
+### Case #3 (Transaction ID: 28999)
+**Risk Score:** 0.9894
+**Key Risk Factors:**
+- **direction_txn_count**: 1.00
+- **Transaction Amount**: 577565.01
+- **anomaly_score_raw**: 0.27
+
+0:	total: 68.7ms	remaining: 1m 8s
+100:	total: 716ms	remaining: 6.37s
+200:	total: 1.35s	remaining: 5.36s
+300:	total: 1.99s	remaining: 4.63s
+400:	total: 2.71s	remaining: 4.05s
+500:	total: 3.36s	remaining: 3.35s
+600:	total: 3.99s	remaining: 2.65s
+700:	total: 4.62s	remaining: 1.97s
+800:	total: 5.24s	remaining: 1.3s
+900:	total: 5.86s	remaining: 644ms
+999:	total: 6.49s	remaining: 0us

@@ -6,21 +6,23 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 class DataStewardAgent:
-    def __init__(self, behavior_path, transactions_path):
+    def __init__(self, behavior_path, transactions_path, skiprows_behavior=2, skiprows_transactions=1):
         self.behavior_path = behavior_path
         self.transactions_path = transactions_path
+        self.skiprows_behavior = skiprows_behavior
+        self.skiprows_transactions = skiprows_transactions
         self.behavior_df = None
         self.transactions_df = None
         self.merged_df = None
 
     def load_data(self):
-        """Loads data from CSV files, handling encoding and separators."""
+        """Loads data from CSV files."""
         logger.info("Loading data...")
         try:
-            # Skip the first 2 rows (Russian description) and use ';' separator
-            self.behavior_df = pd.read_csv(self.behavior_path, skiprows=2, sep=';', quotechar="'", encoding='cp1251')
-            # Transactions file only has 1 row of description
-            self.transactions_df = pd.read_csv(self.transactions_path, skiprows=1, sep=';', quotechar="'", encoding='cp1251')
+            # Behavior patterns has 2 lines of description/header garbage
+            self.behavior_df = pd.read_csv(self.behavior_path, skiprows=self.skiprows_behavior, sep=';', quotechar="'", encoding='cp1251')
+            # Transactions has 1 line of description
+            self.transactions_df = pd.read_csv(self.transactions_path, skiprows=self.skiprows_transactions, sep=';', quotechar="'", encoding='cp1251')
             
             logger.info(f"Loaded behavior data: {self.behavior_df.shape}")
             logger.info(f"Loaded transactions data: {self.transactions_df.shape}")

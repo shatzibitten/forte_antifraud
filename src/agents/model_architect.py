@@ -43,7 +43,12 @@ class ModelArchitectAgent:
         
         # Add categorical features to the list of features to use
         self.model_features = [f for f in self.features if f in self.df.columns] + \
-                              [f for f in self.cat_features if f in self.df.columns]
+                              [f for f in self.cat_features if f in self.df.columns] + \
+                              [f for f in self.df.columns if 'gnn_emb' in f] + \
+                              ['anomaly_score', 'anomaly_score_raw']
+        
+        # Remove duplicates just in case
+        self.model_features = list(set(self.model_features))
 
     def train_validate(self):
         """Performs TimeSeriesSplit validation."""
@@ -97,76 +102,104 @@ class ModelArchitectAgent:
         logger.info(f"Average ROC-AUC: {np.mean(scores):.4f}")
         return np.mean(scores)
 
-    def train_final_model(self):
-        """Trains the model on the entire dataset."""
-        logger.info("Training final model on all data...")
+    def optimize_catboost(self, n_trials=20):
+        """Optimizes CatBoost hyperparameters using Optuna."""
+        import optuna
+        from sklearn.model_selection import cross_val_score
+        
+        logger.info(f"Optimizing CatBoost hyperparameters ({n_trials} trials)...")
+        
         X = self.df[self.model_features]
         y = self.df[self.target]
         
-        self.catboost_model = CatBoostClassifier(
-            iterations=1000,
-            learning_rate=0.05,
-            depth=6,
-            loss_function='Logloss',
-            eval_metric='AUC',
-            cat_features=[f for f in self.cat_features if f in X.columns],
-            verbose=100,
-            random_seed=42,
-            allow_writing_files=False
-        )
+        def objective(trial):
+            params = {
+                'iterations': trial.suggest_int('iterations', 300, 1500),
+                'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.1, log=True),
+                'depth': trial.suggest_int('depth', 4, 8),  # Limit depth to reduce overfitting
+                'l2_leaf_reg': trial.suggest_float('l2_leaf_reg', 1.0, 10.0),  # L2 regularization
+                'bagging_temperature': trial.suggest_float('bagging_temperature', 0.0, 1.0),
+                'random_strength': trial.suggest_float('random_strength', 0.0, 10.0),
+                'loss_function': 'Logloss',
+                'eval_metric': 'AUC',
+                'cat_features': [f for f in self.cat_features if f in X.columns],
+                'verbose': 0,
+                'random_seed': 42,
+                'allow_writing_files': False
+            }
+            
+            model = CatBoostClassifier(**params)
+            
+            # Use TimeSeriesSplit for CV
+            tscv = TimeSeriesSplit(n_splits=3)  # Fewer splits for speed
+            scores = []
+            
+            for train_idx, val_idx in tscv.split(X):
+                X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
+                y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
+                
+                if len(np.unique(y_train)) < 2:
+                    continue
+                    
+                model.fit(X_train, y_train, eval_set=(X_val, y_val), verbose=0)
+                pred = model.predict_proba(X_val)[:, 1]
+                auc = roc_auc_score(y_val, pred)
+                scores.append(auc)
+            
+            return np.mean(scores) if scores else 0.0
         
+        study = optuna.create_study(direction='maximize', study_name='catboost_optimization')
+        study.optimize(objective, n_trials=n_trials, show_progress_bar=True)
+        
+        logger.info(f"Best CatBoost params: {study.best_params}")
+        logger.info(f"Best CV AUC: {study.best_value:.4f}")
+        
+        return study.best_params
+
+    def train_final_model(self, use_optuna=False, n_trials=20):
+        """Trains the model on the entire dataset."""
+        logger.info("Training final CatBoost model...")
+        X = self.df[self.model_features]
+        y = self.df[self.target]
+        
+        if use_optuna:
+            best_params = self.optimize_catboost(n_trials=n_trials)
+            params = {
+                **best_params,
+                'loss_function': 'Logloss',
+                'eval_metric': 'AUC',
+                'cat_features': [f for f in self.cat_features if f in X.columns],
+                'verbose': 100,
+                'random_seed': 42,
+                'allow_writing_files': False
+            }
+        else:
+            params = {
+                'iterations': 1000,
+                'learning_rate': 0.05,
+                'depth': 6,
+                'loss_function': 'Logloss',
+                'eval_metric': 'AUC',
+                'cat_features': [f for f in self.cat_features if f in X.columns],
+                'verbose': 100,
+                'random_seed': 42,
+                'allow_writing_files': False
+            }
+        
+        self.catboost_model = CatBoostClassifier(**params)
         self.catboost_model.fit(X, y)
         logger.info("Final CatBoost model trained.")
         return self.catboost_model
 
-    def train_lightgbm(self):
-        """Trains LightGBM model."""
-        logger.info("Training LightGBM model...")
-        X = self.df[self.model_features]
-        y = self.df[self.target]
+    def optimize_lightgbm(self, n_trials=20):
+        """Optimizes LightGBM hyperparameters using Optuna."""
+        import optuna
+        import lightgbm as lgb
         
-        # LightGBM handles categories differently, usually needs int encoding
-        # But we can use 'categorical_feature' param if we convert to 'category' dtype
-        X_lgb = X.copy()
-        for col in self.cat_features:
-            if col in X_lgb.columns:
-                X_lgb[col] = X_lgb[col].astype('category')
-        
-        self.lgbm_model = lgb.LGBMClassifier(
-            n_estimators=1000,
-            learning_rate=0.05,
-            num_leaves=31,
-            objective='binary',
-            metric='auc',
-            verbose=-1,
-            random_state=42
-        )
-        
-        self.lgbm_model.fit(X_lgb, y)
-        logger.info("LightGBM model trained.")
-        return self.lgbm_model
-
-    def train_stacking(self):
-        """Trains a stacking ensemble."""
-        logger.info("Training Stacking Ensemble...")
-        from sklearn.linear_model import LogisticRegression
-        from sklearn.model_selection import cross_val_predict
+        logger.info(f"Optimizing LightGBM hyperparameters ({n_trials} trials)...")
         
         X = self.df[self.model_features]
         y = self.df[self.target]
-        
-        # 1. Generate out-of-fold predictions for CatBoost
-        logger.info("Generating CatBoost OOF predictions...")
-        # We need a custom wrapper or manual CV because cross_val_predict with CatBoost 
-        # and categorical features can be tricky if not handled carefully.
-        # For simplicity in this hackathon context, we'll use the models trained on full data 
-        # to predict (which is overfitting, but standard Stacking requires K-Fold).
-        # Let's do proper K-Fold for Stacking.
-        
-        tscv = TimeSeriesSplit(n_splits=5)
-        
-        catboost_preds = np.zeros(len(self.df))
-        lgbm_preds = np.zeros(len(self.df))
         
         # Prepare LightGBM data
         X_lgb = X.copy()
@@ -174,10 +207,215 @@ class ModelArchitectAgent:
             if col in X_lgb.columns:
                 X_lgb[col] = X_lgb[col].astype('category')
         
+        def objective(trial):
+            params = {
+                'n_estimators': trial.suggest_int('n_estimators', 300, 1500),
+                'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.1, log=True),
+                'num_leaves': trial.suggest_int('num_leaves', 20, 100),
+                'max_depth': trial.suggest_int('max_depth', 4, 10),
+                'reg_alpha': trial.suggest_float('reg_alpha', 1e-3, 10.0, log=True),
+                'reg_lambda': trial.suggest_float('reg_lambda', 1e-3, 10.0, log=True),
+                'subsample': trial.suggest_float('subsample', 0.5, 1.0),
+                'colsample_bytree': trial.suggest_float('colsample_bytree', 0.5, 1.0),
+                'objective': 'binary',
+                'metric': 'auc',
+                'verbose': -1,
+                'random_state': 42
+            }
+            
+            model = lgb.LGBMClassifier(**params)
+            
+            tscv = TimeSeriesSplit(n_splits=3)
+            scores = []
+            
+            for train_idx, val_idx in tscv.split(X_lgb):
+                X_train, X_val = X_lgb.iloc[train_idx], X_lgb.iloc[val_idx]
+                y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
+                
+                if len(np.unique(y_train)) < 2:
+                    continue
+                    
+                model.fit(X_train, y_train, eval_set=[(X_val, y_val)])
+                pred = model.predict_proba(X_val)[:, 1]
+                auc = roc_auc_score(y_val, pred)
+                scores.append(auc)
+            
+            return np.mean(scores) if scores else 0.0
+        
+        study = optuna.create_study(direction='maximize', study_name='lightgbm_optimization')
+        study.optimize(objective, n_trials=n_trials, show_progress_bar=True)
+        
+        logger.info(f"Best LightGBM params: {study.best_params}")
+        return study.best_params
+
+    def train_lightgbm(self, use_optuna=False, n_trials=20):
+        """Trains LightGBM model."""
+        logger.info("Training LightGBM model...")
+        X = self.df[self.model_features]
+        y = self.df[self.target]
+        
+        X_lgb = X.copy()
+        for col in self.cat_features:
+            if col in X_lgb.columns:
+                X_lgb[col] = X_lgb[col].astype('category')
+        
+        if use_optuna:
+            best_params = self.optimize_lightgbm(n_trials=n_trials)
+            params = {
+                **best_params,
+                'objective': 'binary',
+                'metric': 'auc',
+                'verbose': -1,
+                'random_state': 42
+            }
+        else:
+            params = {
+                'n_estimators': 1000,
+                'learning_rate': 0.05,
+                'num_leaves': 31,
+                'objective': 'binary',
+                'metric': 'auc',
+                'verbose': -1,
+                'random_state': 42
+            }
+        
+        self.lgbm_model = lgb.LGBMClassifier(**params)
+        self.lgbm_model.fit(X_lgb, y)
+        logger.info("LightGBM model trained.")
+        return self.lgbm_model
+
+    def optimize_xgboost(self, n_trials=20):
+        """Optimizes XGBoost hyperparameters using Optuna."""
+        import optuna
+        import xgboost as xgb
+        
+        logger.info(f"Optimizing XGBoost hyperparameters ({n_trials} trials)...")
+        
+        X = self.df[self.model_features]
+        y = self.df[self.target]
+        
+        X_xgb = X.copy()
+        for col in self.cat_features:
+            if col in X_xgb.columns:
+                X_xgb[col] = X_xgb[col].astype('category').cat.codes
+        
+        def objective(trial):
+            params = {
+                'n_estimators': trial.suggest_int('n_estimators', 300, 1500),
+                'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.1, log=True),
+                'max_depth': trial.suggest_int('max_depth', 4, 10),
+                'reg_alpha': trial.suggest_float('reg_alpha', 1e-3, 10.0, log=True),
+                'reg_lambda': trial.suggest_float('reg_lambda', 1e-3, 10.0, log=True),
+                'subsample': trial.suggest_float('subsample', 0.5, 1.0),
+                'colsample_bytree': trial.suggest_float('colsample_bytree', 0.5, 1.0),
+                'gamma': trial.suggest_float('gamma', 0.0, 5.0),
+                'objective': 'binary:logistic',
+                'eval_metric': 'auc',
+                'verbosity': 0,
+                'random_state': 42
+            }
+            
+            model = xgb.XGBClassifier(**params)
+            
+            tscv = TimeSeriesSplit(n_splits=3)
+            scores = []
+            
+            for train_idx, val_idx in tscv.split(X_xgb):
+                X_train, X_val = X_xgb.iloc[train_idx], X_xgb.iloc[val_idx]
+                y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
+                
+                if len(np.unique(y_train)) < 2:
+                    continue
+                    
+                model.fit(X_train, y_train, eval_set=[(X_val, y_val)], verbose=False)
+                pred = model.predict_proba(X_val)[:, 1]
+                auc = roc_auc_score(y_val, pred)
+                scores.append(auc)
+            
+            return np.mean(scores) if scores else 0.0
+        
+        study = optuna.create_study(direction='maximize', study_name='xgboost_optimization')
+        study.optimize(objective, n_trials=n_trials, show_progress_bar=True)
+        
+        logger.info(f"Best XGBoost params: {study.best_params}")
+        return study.best_params
+
+    def train_xgboost(self, use_optuna=False, n_trials=20):
+        """Trains XGBoost model."""
+        logger.info("Training XGBoost model...")
+        import xgboost as xgb
+        
+        X = self.df[self.model_features]
+        y = self.df[self.target]
+        
+        # XGBoost also handles categories, but we encode them
+        X_xgb = X.copy()
+        for col in self.cat_features:
+            if col in X_xgb.columns:
+                X_xgb[col] = X_xgb[col].astype('category').cat.codes
+        
+        if use_optuna:
+            best_params = self.optimize_xgboost(n_trials=n_trials)
+            params = {
+                **best_params,
+                'objective': 'binary:logistic',
+                'eval_metric': 'auc',
+                'verbosity': 0,
+                'random_state': 42
+            }
+        else:
+            params = {
+                'n_estimators': 1000,
+                'learning_rate': 0.05,
+                'max_depth': 6,
+                'objective': 'binary:logistic',
+                'eval_metric': 'auc',
+                'verbosity': 0,
+                'random_state': 42
+            }
+        
+        self.xgboost_model = xgb.XGBClassifier(**params)
+        
+        self.xgboost_model.fit(X_xgb, y)
+        logger.info("XGBoost model trained.")
+        return self.xgboost_model
+
+    def train_stacking(self):
+        """Trains a stacking ensemble with CatBoost, LightGBM, and XGBoost."""
+        logger.info("Training Stacking Ensemble (3 base models)...")
+        from sklearn.linear_model import LogisticRegression
+        import xgboost as xgb
+        
+        X = self.df[self.model_features]
+        y = self.df[self.target]
+        
+        logger.info("Generating out-of-fold predictions...")
+        
+        tscv = TimeSeriesSplit(n_splits=5)
+        
+        catboost_preds = np.zeros(len(self.df))
+        lgbm_preds = np.zeros(len(self.df))
+        xgb_preds = np.zeros(len(self.df))
+        
+        # Prepare data for different models
+        X_lgb = X.copy()
+        for col in self.cat_features:
+            if col in X_lgb.columns:
+                X_lgb[col] = X_lgb[col].astype('category')
+        
+        X_xgb = X.copy()
+        for col in self.cat_features:
+            if col in X_xgb.columns:
+                X_xgb[col] = X_xgb[col].astype('category').cat.codes
+        
         for train_index, test_index in tscv.split(X):
             X_train, X_test = X.iloc[train_index], X.iloc[test_index]
             X_train_lgb, X_test_lgb = X_lgb.iloc[train_index], X_lgb.iloc[test_index]
+            X_train_xgb, X_test_xgb = X_xgb.iloc[train_index], X_xgb.iloc[test_index]
             y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+            
+            if len(np.unique(y_train)) < 2:
+                continue
             
             # CatBoost
             cb = CatBoostClassifier(iterations=200, learning_rate=0.05, depth=6, verbose=0, 
@@ -191,17 +429,18 @@ class ModelArchitectAgent:
             lg.fit(X_train_lgb, y_train)
             lgbm_preds[test_index] = lg.predict_proba(X_test_lgb)[:, 1]
             
-        # Meta-learner features
-        # We only use the indices that were part of the test sets (i.e., not the first training fold)
-        # But TimeSeriesSplit leaves the first chunk as train only. 
-        # So the first chunk of predictions will be 0.
-        # We should only train meta-learner on the non-zero parts.
-        
-        mask = catboost_preds != 0 # Simple heuristic
+            # XGBoost
+            xg = xgb.XGBClassifier(n_estimators=200, learning_rate=0.05, max_depth=6, verbosity=0, random_state=42)
+            xg.fit(X_train_xgb, y_train)
+            xgb_preds[test_index] = xg.predict_proba(X_test_xgb)[:, 1]
+            
+        # Meta-learner training
+        mask = catboost_preds != 0
         
         meta_X = pd.DataFrame({
             'catboost': catboost_preds[mask],
-            'lgbm': lgbm_preds[mask]
+            'lgbm': lgbm_preds[mask],
+            'xgboost': xgb_preds[mask]
         })
         meta_y = y[mask]
         
@@ -212,17 +451,27 @@ class ModelArchitectAgent:
         return self.meta_model
 
     def predict_stacking(self, X):
-        """Predicts using the stacking ensemble."""
-        # Ensure X has same format
+        """Predicts using the stacking ensemble with 3 base models."""
+        # Ensure X has same format for each model
         X_lgb = X.copy()
         for col in self.cat_features:
             if col in X_lgb.columns:
                 X_lgb[col] = X_lgb[col].astype('category')
+        
+        X_xgb = X.copy()
+        for col in self.cat_features:
+            if col in X_xgb.columns:
+                X_xgb[col] = X_xgb[col].astype('category').cat.codes
                 
         cb_pred = self.catboost_model.predict_proba(X)[:, 1]
         lg_pred = self.lgbm_model.predict_proba(X_lgb)[:, 1]
+        xg_pred = self.xgboost_model.predict_proba(X_xgb)[:, 1]
         
-        meta_features = pd.DataFrame({'catboost': cb_pred, 'lgbm': lg_pred})
+        meta_features = pd.DataFrame({
+            'catboost': cb_pred, 
+            'lgbm': lg_pred,
+            'xgboost': xg_pred
+        })
         return self.meta_model.predict_proba(meta_features)[:, 1]
 
     def save_models(self, path='models/'):
@@ -241,6 +490,9 @@ class ModelArchitectAgent:
         if self.lgbm_model:
             self.lgbm_model.booster_.save_model(os.path.join(path, 'lightgbm_model.txt'))
             
+        if hasattr(self, 'xgboost_model') and self.xgboost_model:
+            self.xgboost_model.save_model(os.path.join(path, 'xgboost_model.json'))
+
         if hasattr(self, 'meta_model'):
             joblib.dump(self.meta_model, os.path.join(path, 'meta_model.joblib'))
             
@@ -250,6 +502,7 @@ class ModelArchitectAgent:
         """Loads models from disk."""
         import os
         import joblib
+        import xgboost as xgb
         
         logger.info(f"Loading models from {path}...")
         
@@ -259,10 +512,10 @@ class ModelArchitectAgent:
             
         if os.path.exists(os.path.join(path, 'lightgbm_model.txt')):
             self.lgbm_model = lgb.Booster(model_file=os.path.join(path, 'lightgbm_model.txt'))
-            # Wrap in sklearn-like interface for consistency if needed, 
-            # but for inference we might just use predict directly.
-            # Re-creating LGBMClassifier wrapper is tricky with loaded booster.
-            # We'll handle this in predict_stacking_inference.
+            
+        if os.path.exists(os.path.join(path, 'xgboost_model.json')):
+            self.xgboost_model = xgb.XGBClassifier()
+            self.xgboost_model.load_model(os.path.join(path, 'xgboost_model.json'))
             
         if os.path.exists(os.path.join(path, 'meta_model.joblib')):
             self.meta_model = joblib.load(os.path.join(path, 'meta_model.joblib'))
@@ -271,19 +524,37 @@ class ModelArchitectAgent:
 
     def predict_stacking_inference(self, X):
         """Predicts using loaded models (handles LGBM booster difference)."""
+        # Filter features to match what the model expects
+        if self.catboost_model:
+            expected_features = self.catboost_model.feature_names_
+            X_filtered = X[expected_features].copy()
+        else:
+            X_filtered = X.copy()
+
         # Ensure X has same format
-        X_lgb = X.copy()
+        X_lgb = X_filtered.copy()
         for col in self.cat_features:
             if col in X_lgb.columns:
                 X_lgb[col] = X_lgb[col].astype('category')
+        
+        X_xgb = X_filtered.copy()
+        for col in self.cat_features:
+            if col in X_xgb.columns:
+                X_xgb[col] = X_xgb[col].astype('category').cat.codes
                 
-        cb_pred = self.catboost_model.predict_proba(X)[:, 1]
+        cb_pred = self.catboost_model.predict_proba(X_filtered)[:, 1]
         
         # LGBM Booster predicts raw scores or probs depending on objective. 
-        # For binary classification with 'auc' it usually outputs probabilities directly.
         lg_pred = self.lgbm_model.predict(X_lgb)
         
-        meta_features = pd.DataFrame({'catboost': cb_pred, 'lgbm': lg_pred})
+        # XGBoost
+        xg_pred = self.xgboost_model.predict_proba(X_xgb)[:, 1]
+        
+        meta_features = pd.DataFrame({
+            'catboost': cb_pred, 
+            'lgbm': lg_pred,
+            'xgboost': xg_pred
+        })
         return self.meta_model.predict_proba(meta_features)[:, 1]
 
 if __name__ == "__main__":
