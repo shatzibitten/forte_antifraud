@@ -111,6 +111,20 @@ You can easily adjust the fraud detection threshold and other settings in `confi
 fraud_threshold: 0.5
 ```
 
+## 🤖 Pre-trained Models
+
+The repository includes pre-trained models in the `models/` directory, ready for immediate inference:
+
+| File | Description | Size |
+|------|-------------|------|
+| `catboost_model.cbm` | CatBoost classifier (base model) | 1.4 MB |
+| `lightgbm_model.txt` | LightGBM classifier (base model) | 1.3 MB |
+| `xgboost_model.json` | XGBoost classifier (base model) | 1.0 MB |
+| `meta_model.joblib` | Logistic Regression meta-learner for stacking | 1.1 KB |
+| `calibrator.joblib` | Probability calibrator (Platt scaling) | 999 B |
+
+These models were trained on the ForteBank hackathon dataset using TimeSeriesSplit cross-validation. The stacking ensemble combines predictions from all three base models via the meta-learner for improved performance.
+
 ## 📊 Results Summary
 
 | Metric | Train Period | Holdout Period |
