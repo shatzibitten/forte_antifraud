@@ -22,6 +22,10 @@ This repository contains the source code for our solution to the **Transactional
 - **TimeSeriesSplit (5 Folds):** Strictly respects temporal order to prevent data leakage.
 - **Drift Analysis:** Automated detection of concept drift between Train and Holdout sets.
 
+### 4. Interactive Dashboard
+- **Streamlit App:** Real-time visualization of model performance, calibration curves, and SHAP explanations.
+- **Scenario Testing:** Adjust thresholds and see the impact on business metrics instantly.
+
 ## 🛠️ Installation & Usage
 
 ### Prerequisites
@@ -56,6 +60,13 @@ This will:
 5. Generate a `shap_summary.png` and business metrics.
 6. Output LLM explanations for top suspicious cases.
 
+### Interactive Demo
+We provide a Streamlit-based dashboard to explore the model's predictions and business impact.
+
+```bash
+streamlit run demo_app.py
+```
+
 ### Configuration
 You can easily adjust the fraud detection threshold and other settings in `config.yaml`:
 ```yaml
@@ -87,8 +98,11 @@ fraud_threshold: 0.5
 │   │   └── graph_embedder.py
 │   └── fix_segfault.py     # macOS ARM64 fix
 ├── main.py                 # Entry point
+├── demo_app.py             # Streamlit Dashboard
+├── config.yaml             # Configuration
 ├── requirements.txt        # Dependencies
-└── solution_report.md      # Detailed technical report
+├── solution_report.md      # Detailed technical report (English)
+└── solution_report_ru.md   # Detailed technical report (Russian)
 ```
 
 ## 📝 License
