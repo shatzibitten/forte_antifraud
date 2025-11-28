@@ -1,55 +1,60 @@
-# Виртуальное окружение
-venv/
-env/
-.env
-
-# Agent configuration (keep this in repository!)
-# .agent/
-
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# Модели и предсказания
+# Virtual Env
+venv/
+env/
+ENV/
+
+# Project Specific
+datasets/
 models/
-models_iso/
-*.cbm
-*.txt
-*.joblib
-predictions_*.csv
-
-# Логи и отладка
-debug_log.txt
-run_log.txt
-raw_lines*.txt
-cols.txt
-
-# Графики и изображения
+catboost_info/
+logs/
+*.log
 *.png
-*.jpg
-*.jpeg
-
-# Датасеты (если не нужны в репозитории)
-# datasets/
+!plot_*.png
+!shap_summary.png
 
 # IDE
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
-
-# macOS
 .DS_Store
-.AppleDouble
-.LSOverride
 
-# Jupyter Notebooks
-.ipynb_checkpoints
-*.ipynb
+# Experiments & Synthetic Data
+synthetic_experiment/
+drift_experiment/
+models_iso/
+predictions_synthetic_*.csv
 
-# PDF и текстовые извлечения
-pdf_content.txt
+# Logs & Debug
+debug_log.txt
+
+# Meta & Personal Content
+linkedin_*.md
+ai_survival_conclusion.md
+knowledges/
+solution_report.pdf
+solution_report_ru.pdf
+uploaded_image_*.png

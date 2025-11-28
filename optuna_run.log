@@ -1,110 +1,0 @@
-2025-11-22 16:12:43,432 - INFO - Starting ForteBank AI Hackathon Pipeline...
-2025-11-22 16:12:43,432 - INFO - Loading data...
-2025-11-22 16:12:43,470 - INFO - Loaded behavior data: (8587, 19)
-2025-11-22 16:12:43,470 - INFO - Loaded transactions data: (13113, 7)
-2025-11-22 16:12:43,470 - INFO - Cleaning data...
-2025-11-22 16:12:43,485 - INFO - Merging data...
-2025-11-22 16:12:43,485 - INFO - Transactions dtypes: transdatetime=datetime64[ns], cst_dim_id=int64
-2025-11-22 16:12:43,485 - INFO - Behavior dtypes: transdate=datetime64[ns], cst_dim_id=int64
-2025-11-22 16:12:43,492 - INFO - Merged data shape: (13107, 28)
-2025-11-22 16:12:43,493 - INFO - Generating features...
-2025-11-22 16:12:43,493 - INFO - Generating velocity features...
-2025-11-22 16:12:43,523 - INFO - Generating interaction features...
-2025-11-22 16:12:43,525 - INFO - Generating identity features...
-2025-11-22 16:12:43,529 - INFO - Generating graph features...
-2025-11-22 16:12:43,535 - INFO - Generating time delta features...
-2025-11-22 16:12:43,537 - INFO - Generating GNN embeddings...
-2025-11-22 16:12:43,539 - INFO - Building transaction graph for embeddings...
-2025-11-22 16:12:43,540 - INFO - Graph has 2291 nodes (clients + receivers).
-2025-11-22 16:12:43,545 - INFO - Generating graph embeddings via TruncatedSVD...
-2025-11-22 16:12:43,561 - INFO - Embeddings generated. Explained variance: 0.3792
-2025-11-22 16:12:43,567 - INFO - Generating anomaly features (Isolation Forest)...
-2025-11-22 16:12:43,709 - INFO - 
-============================================================
-2025-11-22 16:12:43,709 - INFO - DATA SPLIT:
-2025-11-22 16:12:43,710 - INFO - Train set: 11141 transactions (2024-11-30 05:45:05 to 2025-07-07 15:19:13)
-2025-11-22 16:12:43,710 - INFO - Holdout set: 1966 transactions (2025-07-07 15:24:01 to 2025-08-29 22:12:01)
-2025-11-22 16:12:43,710 - INFO - Train fraud rate: 0.0056
-2025-11-22 16:12:43,710 - INFO - Holdout fraud rate: 0.0524
-2025-11-22 16:12:43,710 - INFO - ============================================================
-
-2025-11-22 16:12:43,719 - INFO - 
-============================================================
-2025-11-22 16:12:43,719 - INFO - HYPERPARAMETER OPTIMIZATION WITH OPTUNA
-2025-11-22 16:12:43,719 - INFO - ============================================================
-
-2025-11-22 16:12:43,719 - INFO - Training final CatBoost model...
-2025-11-22 16:12:43,766 - INFO - Optimizing CatBoost hyperparameters (15 trials)...
-[I 2025-11-22 16:12:43,767] A new study created in memory with name: catboost_optimization
-  0%|          | 0/15 [00:00<?, ?it/s]                                        0%|          | 0/15 [00:03<?, ?it/s]Best trial: 0. Best value: 0.952931:   0%|          | 0/15 [00:03<?, ?it/s]Best trial: 0. Best value: 0.952931:   7%|▋         | 1/15 [00:03<00:51,  3.66s/it]                                                                                   Best trial: 0. Best value: 0.952931:   7%|▋         | 1/15 [00:07<00:51,  3.66s/it]Best trial: 0. Best value: 0.952931:   7%|▋         | 1/15 [00:07<00:51,  3.66s/it]Best trial: 0. Best value: 0.952931:  13%|█▎        | 2/15 [00:07<00:47,  3.64s/it]                                                                                   Best trial: 0. Best value: 0.952931:  13%|█▎        | 2/15 [00:14<00:47,  3.64s/it]Best trial: 2. Best value: 0.963454:  13%|█▎        | 2/15 [00:14<00:47,  3.64s/it]Best trial: 2. Best value: 0.963454:  20%|██        | 3/15 [00:14<01:00,  5.07s/it]                                                                                   Best trial: 2. Best value: 0.963454:  20%|██        | 3/15 [00:24<01:00,  5.07s/it]Best trial: 2. Best value: 0.963454:  20%|██        | 3/15 [00:24<01:00,  5.07s/it]Best trial: 2. Best value: 0.963454:  27%|██▋       | 4/15 [00:24<01:20,  7.30s/it]                                                                                   Best trial: 2. Best value: 0.963454:  27%|██▋       | 4/15 [00:29<01:20,  7.30s/it]Best trial: 2. Best value: 0.963454:  27%|██▋       | 4/15 [00:29<01:20,  7.30s/it]Best trial: 2. Best value: 0.963454:  33%|███▎      | 5/15 [00:29<01:02,  6.24s/it]                                                                                   Best trial: 2. Best value: 0.963454:  33%|███▎      | 5/15 [00:36<01:02,  6.24s/it]Best trial: 2. Best value: 0.963454:  33%|███▎      | 5/15 [00:36<01:02,  6.24s/it]Best trial: 2. Best value: 0.963454:  40%|████      | 6/15 [00:36<00:58,  6.54s/it]                                                                                   Best trial: 2. Best value: 0.963454:  40%|████      | 6/15 [00:39<00:58,  6.54s/it]Best trial: 2. Best value: 0.963454:  40%|████      | 6/15 [00:39<00:58,  6.54s/it]Best trial: 2. Best value: 0.963454:  47%|████▋     | 7/15 [00:39<00:42,  5.37s/it]                                                                                   Best trial: 2. Best value: 0.963454:  47%|████▋     | 7/15 [00:42<00:42,  5.37s/it]Best trial: 2. Best value: 0.963454:  47%|████▋     | 7/15 [00:42<00:42,  5.37s/it]Best trial: 2. Best value: 0.963454:  53%|█████▎    | 8/15 [00:42<00:32,  4.71s/it]                                                                                   Best trial: 2. Best value: 0.963454:  53%|█████▎    | 8/15 [00:49<00:32,  4.71s/it]Best trial: 2. Best value: 0.963454:  53%|█████▎    | 8/15 [00:49<00:32,  4.71s/it]Best trial: 2. Best value: 0.963454:  60%|██████    | 9/15 [00:49<00:31,  5.29s/it]                                                                                   Best trial: 2. Best value: 0.963454:  60%|██████    | 9/15 [00:59<00:31,  5.29s/it]Best trial: 2. Best value: 0.963454:  60%|██████    | 9/15 [00:59<00:31,  5.29s/it]Best trial: 2. Best value: 0.963454:  67%|██████▋   | 10/15 [00:59<00:34,  6.83s/it]                                                                                    Best trial: 2. Best value: 0.963454:  67%|██████▋   | 10/15 [01:06<00:34,  6.83s/it]Best trial: 2. Best value: 0.963454:  67%|██████▋   | 10/15 [01:06<00:34,  6.83s/it]Best trial: 2. Best value: 0.963454:  73%|███████▎  | 11/15 [01:06<00:27,  6.88s/it]                                                                                    Best trial: 2. Best value: 0.963454:  73%|███████▎  | 11/15 [01:16<00:27,  6.88s/it]Best trial: 11. Best value: 0.963843:  73%|███████▎  | 11/15 [01:16<00:27,  6.88s/it]Best trial: 11. Best value: 0.963843:  80%|████████  | 12/15 [01:16<00:23,  7.83s/it]                                                                                     Best trial: 11. Best value: 0.963843:  80%|████████  | 12/15 [01:27<00:23,  7.83s/it]Best trial: 12. Best value: 0.967644:  80%|████████  | 12/15 [01:27<00:23,  7.83s/it]Best trial: 12. Best value: 0.967644:  87%|████████▋ | 13/15 [01:27<00:17,  8.87s/it]                                                                                     Best trial: 12. Best value: 0.967644:  87%|████████▋ | 13/15 [01:38<00:17,  8.87s/it]Best trial: 12. Best value: 0.967644:  87%|████████▋ | 13/15 [01:38<00:17,  8.87s/it]Best trial: 12. Best value: 0.967644:  93%|█████████▎| 14/15 [01:38<00:09,  9.51s/it]                                                                                     Best trial: 12. Best value: 0.967644:  93%|█████████▎| 14/15 [01:48<00:09,  9.51s/it]Best trial: 12. Best value: 0.967644:  93%|█████████▎| 14/15 [01:48<00:09,  9.51s/it]Best trial: 12. Best value: 0.967644: 100%|██████████| 15/15 [01:48<00:00,  9.72s/it]Best trial: 12. Best value: 0.967644: 100%|██████████| 15/15 [01:48<00:00,  7.25s/it]
-2025-11-22 16:14:32,602 - INFO - Best CatBoost params: {'iterations': 1500, 'learning_rate': 0.022982874244726923, 'depth': 5, 'l2_leaf_reg': 1.0152697335403762, 'bagging_temperature': 0.45376136564970804, 'random_strength': 5.185624100367181}
-2025-11-22 16:14:32,602 - INFO - Best CV AUC: 0.9676
-2025-11-22 16:14:40,988 - INFO - Final CatBoost model trained.
-2025-11-22 16:14:40,988 - INFO - Training LightGBM model...
-2025-11-22 16:14:43,702 - INFO - LightGBM model trained.
-2025-11-22 16:14:43,702 - INFO - Training XGBoost model...
-2025-11-22 16:14:44,656 - INFO - XGBoost model trained.
-2025-11-22 16:14:44,657 - INFO - Training Stacking Ensemble (3 base models)...
-2025-11-22 16:14:44,658 - INFO - Generating out-of-fold predictions...
-2025-11-22 16:14:52,403 - INFO - Stacking Meta-Model Coefficients: [[2.50627551 0.292213   3.35490988]]
-2025-11-22 16:14:52,404 - INFO - Saving models to models/...
-2025-11-22 16:14:52,414 - INFO - Models saved successfully.
-2025-11-22 16:14:52,414 - INFO - Generating SHAP explanations...
-2025-11-22 16:14:52,418 - INFO - Generating SHAP explanation...
-2025-11-22 16:14:53,191 - INFO - SHAP summary saved to shap_summary.png
-2025-11-22 16:14:53,191 - INFO - 
-============================================================
-2025-11-22 16:14:53,191 - INFO - TRAIN SET METRICS (reference only):
-2025-11-22 16:14:53,192 - INFO - ============================================================
-2025-11-22 16:14:53,195 - INFO - Calculating business metrics...
-2025-11-22 16:14:53,323 - INFO - Saved Money: 21,048,997.37
-2025-11-22 16:14:53,323 - INFO - Lost Money: 0.00
-2025-11-22 16:14:53,323 - INFO - Blocked Legit Money: 0.00
-2025-11-22 16:14:53,323 - INFO - 
-============================================================
-2025-11-22 16:14:53,324 - INFO - HOLDOUT TEST SET METRICS (final evaluation):
-2025-11-22 16:14:53,324 - INFO - ============================================================
-2025-11-22 16:14:53,327 - INFO - Calculating business metrics...
-2025-11-22 16:14:53,360 - INFO - Saved Money: 801,257.00
-2025-11-22 16:14:53,360 - INFO - Lost Money: 15,216,900.00
-2025-11-22 16:14:53,360 - INFO - Blocked Legit Money: 675,600.00
-2025-11-22 16:14:53,360 - INFO - 
-============================================================
-2025-11-22 16:14:53,360 - INFO - SUMMARY:
-2025-11-22 16:14:53,360 - INFO - ============================================================
-2025-11-22 16:14:53,360 - INFO - Train Set Saved: 21,048,997.37 KZT
-2025-11-22 16:14:53,360 - INFO - Holdout Set Saved: 801,257.00 KZT
-2025-11-22 16:14:53,360 - INFO - Holdout Set Lost: 15,216,900.00 KZT
-2025-11-22 16:14:53,360 - INFO - ============================================================
-
-[I 2025-11-22 16:12:47,435] Trial 0 finished with value: 0.9529309115778675 and parameters: {'iterations': 311, 'learning_rate': 0.0440321307945428, 'depth': 7, 'l2_leaf_reg': 1.982234061274147, 'bagging_temperature': 0.785356979743347, 'random_strength': 9.497351602094342}. Best is trial 0 with value: 0.9529309115778675.
-[I 2025-11-22 16:12:51,056] Trial 1 finished with value: 0.9243219128536294 and parameters: {'iterations': 348, 'learning_rate': 0.0736337103123003, 'depth': 7, 'l2_leaf_reg': 7.596683710431138, 'bagging_temperature': 0.11899241051503295, 'random_strength': 3.0130170110154864}. Best is trial 0 with value: 0.9529309115778675.
-[I 2025-11-22 16:12:57,834] Trial 2 finished with value: 0.9634539476280036 and parameters: {'iterations': 981, 'learning_rate': 0.09907529811991114, 'depth': 5, 'l2_leaf_reg': 2.8084599403744357, 'bagging_temperature': 0.31902899574381705, 'random_strength': 2.9448081160201833}. Best is trial 2 with value: 0.9634539476280036.
-[I 2025-11-22 16:13:08,557] Trial 3 finished with value: 0.9446980653137453 and parameters: {'iterations': 1288, 'learning_rate': 0.07175584035018005, 'depth': 6, 'l2_leaf_reg': 3.3133887089413827, 'bagging_temperature': 0.7845720776433655, 'random_strength': 0.5913046978611824}. Best is trial 2 with value: 0.9634539476280036.
-[I 2025-11-22 16:13:12,911] Trial 4 finished with value: 0.9223571870109032 and parameters: {'iterations': 434, 'learning_rate': 0.048787882768969434, 'depth': 7, 'l2_leaf_reg': 7.655954553165394, 'bagging_temperature': 0.8051454741868487, 'random_strength': 2.8799611644740564}. Best is trial 2 with value: 0.9634539476280036.
-[I 2025-11-22 16:13:20,021] Trial 5 finished with value: 0.9576864256309761 and parameters: {'iterations': 938, 'learning_rate': 0.06301340533776695, 'depth': 5, 'l2_leaf_reg': 4.153536913221765, 'bagging_temperature': 0.11731099897536501, 'random_strength': 2.009951230476922}. Best is trial 2 with value: 0.9634539476280036.
-[I 2025-11-22 16:13:22,980] Trial 6 finished with value: 0.9582155116857154 and parameters: {'iterations': 492, 'learning_rate': 0.03395756964618756, 'depth': 4, 'l2_leaf_reg': 5.043016131325007, 'bagging_temperature': 0.1853609748477879, 'random_strength': 8.763995401746236}. Best is trial 2 with value: 0.9634539476280036.
-[I 2025-11-22 16:13:26,290] Trial 7 finished with value: 0.9392149329896229 and parameters: {'iterations': 323, 'learning_rate': 0.041035240391023575, 'depth': 7, 'l2_leaf_reg': 2.359562865157619, 'bagging_temperature': 0.9686960295607661, 'random_strength': 0.16315951975647391}. Best is trial 2 with value: 0.9634539476280036.
-[I 2025-11-22 16:13:32,841] Trial 8 finished with value: 0.9454191074927991 and parameters: {'iterations': 671, 'learning_rate': 0.011568546899295614, 'depth': 7, 'l2_leaf_reg': 4.281838096330101, 'bagging_temperature': 0.33107591853480556, 'random_strength': 7.593188951656332}. Best is trial 2 with value: 0.9634539476280036.
-[I 2025-11-22 16:13:43,127] Trial 9 finished with value: 0.9593714045217209 and parameters: {'iterations': 1275, 'learning_rate': 0.018678820023829718, 'depth': 6, 'l2_leaf_reg': 2.4081093829395166, 'bagging_temperature': 0.47773075464031334, 'random_strength': 9.317838721422605}. Best is trial 2 with value: 0.9634539476280036.
-[I 2025-11-22 16:13:50,131] Trial 10 finished with value: 0.9568964791603645 and parameters: {'iterations': 994, 'learning_rate': 0.021083527624117346, 'depth': 4, 'l2_leaf_reg': 9.478166891593624, 'bagging_temperature': 0.5092661428923941, 'random_strength': 5.521278451170356}. Best is trial 2 with value: 0.9634539476280036.
-[I 2025-11-22 16:14:00,141] Trial 11 finished with value: 0.9638427787934186 and parameters: {'iterations': 1437, 'learning_rate': 0.017622376990319367, 'depth': 5, 'l2_leaf_reg': 1.3549374691893994, 'bagging_temperature': 0.4639035585419967, 'random_strength': 5.135173768434573}. Best is trial 11 with value: 0.9638427787934186.
-[I 2025-11-22 16:14:11,397] Trial 12 finished with value: 0.9676435758157642 and parameters: {'iterations': 1500, 'learning_rate': 0.022982874244726923, 'depth': 5, 'l2_leaf_reg': 1.0152697335403762, 'bagging_temperature': 0.45376136564970804, 'random_strength': 5.185624100367181}. Best is trial 12 with value: 0.9676435758157642.
-[I 2025-11-22 16:14:22,368] Trial 13 finished with value: 0.9650511093867137 and parameters: {'iterations': 1468, 'learning_rate': 0.022625462032654278, 'depth': 5, 'l2_leaf_reg': 1.0053979798778039, 'bagging_temperature': 0.5335776542200087, 'random_strength': 5.537018770044963}. Best is trial 12 with value: 0.9676435758157642.
-[I 2025-11-22 16:14:32,601] Trial 14 finished with value: 0.9610943406152592 and parameters: {'iterations': 1418, 'learning_rate': 0.02540386580921528, 'depth': 5, 'l2_leaf_reg': 6.759923789994223, 'bagging_temperature': 0.6287297951228206, 'random_strength': 6.5583481643887165}. Best is trial 12 with value: 0.9676435758157642.
-0:	total: 5.73ms	remaining: 8.59s
-100:	total: 546ms	remaining: 7.56s
-200:	total: 1.05s	remaining: 6.8s
-300:	total: 1.55s	remaining: 6.18s
-400:	total: 2.05s	remaining: 5.63s
-500:	total: 2.58s	remaining: 5.15s
-600:	total: 3.11s	remaining: 4.65s
-700:	total: 3.74s	remaining: 4.26s
-800:	total: 4.55s	remaining: 3.97s
-900:	total: 5.12s	remaining: 3.41s
-1000:	total: 5.71s	remaining: 2.85s
-1100:	total: 6.27s	remaining: 2.27s
-1200:	total: 6.78s	remaining: 1.69s
-1300:	total: 7.29s	remaining: 1.11s
-1400:	total: 7.82s	remaining: 553ms
-1499:	total: 8.35s	remaining: 0us

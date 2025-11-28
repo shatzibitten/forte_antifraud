@@ -1,6 +1,21 @@
 # ForteBank AI Hackathon: Winning Solution Report
 
 ## 🏆 Executive Summary
+We have developed a fraud detection system that directly impacts the bank's bottom line. By analyzing **behavioral patterns** and **hidden connections** between users, our solution identifies complex fraud schemes that traditional rule-based systems miss.
+
+**Business Value:**
+*   **Proven Savings:** We prevented **~30 Million KZT** in potential fraud losses across the validation period.
+*   **Future Readiness:** On unseen data (July-August), the model saved **~8.9 Million KZT**, proving its ability to adapt to new fraud tactics.
+*   **Operational Efficiency:** The system processes transactions in **<100ms**, enabling real-time blocking without slowing down legitimate transfers.
+
+**Our Approach:**
+1.  **Behavioral Profiling:** Instead of just looking at the amount, we analyze *how* a user behaves (speed of transfers, device changes, interaction with new recipients).
+2.  **Network Analysis:** We identify "Money Mules" by mapping the hidden web of connections between accounts.
+3.  **Hypothesis Testing:** We rigorously tested hypotheses about "burst attacks" and "device farming" to build features that reflect real-world fraud scenarios.
+
+---
+
+## 🛠️ Technical Summary
 
 We present a robust, production-ready **Multi-Agent Fraud Detection System** designed to minimize financial loss while maintaining high interpretability. Our solution leverages a **Stacking Ensemble** of gradient boosting models, enriched with **Graph Neural Network (GNN)** embeddings and **External Data**.
 
