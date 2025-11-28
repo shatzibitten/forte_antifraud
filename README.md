@@ -67,6 +67,42 @@ We provide a Streamlit-based dashboard to explore the model's predictions and bu
 streamlit run demo_app.py
 ```
 
+### Running Inference on Custom Datasets
+To run fraud detection on your own transaction data:
+
+```bash
+python inference.py \
+  --transactions path/to/new_transactions.csv \
+  --behavior path/to/behavior_patterns.csv \
+  --model_dir models/ \
+  --output predictions.csv \
+  --skiprows 1
+```
+
+**Parameters:**
+- `--transactions`: Path to transactions CSV file
+- `--behavior`: Path to behavior patterns CSV file (can be the same as training or updated)
+- `--model_dir`: Directory containing trained models (default: `models/`)
+- `--output`: Output file for predictions (default: `predictions.csv`)
+- `--skiprows`: Number of header rows to skip (default: 1 for original format, 0 for clean CSV)
+
+**Required Data Format:**
+
+Your transactions CSV should contain:
+- `cst_dim_id`: Customer ID
+- `transdatetime`: Transaction timestamp (YYYY-MM-DD HH:MM:SS)
+- `amount`: Transaction amount
+- `mcc_code`: Merchant Category Code
+- `country`: Transaction country
+- Additional fields as per original schema
+
+Your behavior CSV should contain:
+- `cst_dim_id`: Customer ID
+- `login_timestamp`: Login timestamp
+- `device_id`, `device_type`, `os_version`, `ip_address`
+
+The output will include fraud probabilities and binary predictions for each transaction.
+
 ### Configuration
 You can easily adjust the fraud detection threshold and other settings in `config.yaml`:
 ```yaml
